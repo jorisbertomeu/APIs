@@ -45,9 +45,10 @@ exports._postL1_logout = function(req, res) {
 	user.save(function(err) {
 	    if (err)
 		res.send(err);
-	    res.json(user);
+	    var obj = user.toObject();
+	    delete obj['user_tokens'];
+	    res.json(obj);
 	});
-	//delete obj['user_tokens'];
     });
 };
 
@@ -68,9 +69,9 @@ exports._postL1_login = function(req, res) {
 	user.save(function(err) {
 	    if (err)
 		res.send(err);
+	    delete obj['user_tokens'];
 	    res.json(obj);
 	});
-	//delete obj['user_tokens'];
     });
 };
 

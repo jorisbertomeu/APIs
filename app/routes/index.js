@@ -3,17 +3,29 @@ var LabsController = require('../controllers/labs');
 var Board_instancesController = require('../controllers/board_instances');
 var CustomersController = require('../controllers/customers');
 var UsersController = require('../controllers/users');
+var User = require('../models/user');
 
 module.exports = function(app, express) {
     var router = express.Router();
 
     router.use(function(req, res, next) {
-	console.log('Something is happening.');
+	var allowedRes = ["/login", "/"];
+	
+	if (allowedRes.indexOf(req.originalUrl) < 0) {
+	    if (!req.headers.hasOwnProperty('authorization'))
+		res.send({'error': 'No token API provided'});
+	    User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
+		if (err)
+		    res.send(err);
+		if (!user)
+		    res.send({'error': 'No user found for this token'});
+	    });
+	}
 	next();
     });
 
     router.get('/', function(req, res) {
-	res.json({ message: 'Hooray! Welcome to our private API! Made with <3 by Baylibre' });	
+	res.json({ message: 'Hooray! Welcome to our private API! Made with <3 by Joris Bertomeu <joris.bertomeu@epitech.eu>' });	
     });
 
     /* BOARDS RES */
