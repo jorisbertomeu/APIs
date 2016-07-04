@@ -34,12 +34,16 @@ function randomString(len, charSet) {
 }
 
 exports._postL1_logout = function(req, res) {
+    if (!req.body.hasOwnProperty('username')) {
+	res.send({'error': 'You must provide a \'username\' property into body request to logout an user'});
+	return;
+    }
     User.findOne({"username": req.body.username}, function(err, user) {
 	if (err)
 	    res.send(err);
 
 	if (user.user_tokens.indexOf(req.headers.authorization) < 0)
-	    res.send({message: 'Token provided is not associated to the specified user'});
+	    res.send({'error': 'Token provided is not associated to the specified user'});
 	
 	user.user_tokens.splice(user.user_tokens.indexOf(req.headers.authorization), 1);
 	user.save(function(err) {
