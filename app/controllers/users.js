@@ -2,6 +2,7 @@ var User = require('../models/user');
 var Customer = require('../models/customer');
 var Promise = require('bluebird');
 var crypto = require('crypto');
+var Utils = require('../utils');
 
 exports._postL1 = function(req, res) {
     var user = new User();
@@ -80,10 +81,16 @@ exports._postL1_login = function(req, res) {
 };
 
 exports._getL1 = function(req, res) {
-    User.find({}, function(err, users) {
-	if (err)
-	    res.send(err);
-	res.json(users);
+    Utils.checkToken(req, res, true).then(function(result) {
+	if (!result) {
+	    Utils.sendUnauthorized(req, res);
+	    return;
+	};
+	User.find({}, function(err, users) {
+	    if (err)
+		res.send(err);
+	    res.json(users);
+	});
     });
 };
 
