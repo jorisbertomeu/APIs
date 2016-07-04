@@ -24,7 +24,7 @@ exports._postL1 = function(req, res) {
 };
 
 function randomString(len, charSet) {
-    charSet = charSet || 'ABCDEFGHIJKLMN-OPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     var randomString = '';
     for (var i = 0; i < len; i++) {
 	var randomPoz = Math.floor(Math.random() * charSet.length);
@@ -35,7 +35,7 @@ function randomString(len, charSet) {
 
 exports._postL1_logout = function(req, res) {
     if (!req.body.hasOwnProperty('username')) {
-	res.send({'error': 'You must provide a \'username\' property into body request to logout an user'});
+	res.send({'error': 'You must provide a \'username\' property into JSON body request to logout an user'});
 	return;
     }
     User.findOne({"username": req.body.username}, function(err, user) {

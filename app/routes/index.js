@@ -12,6 +12,7 @@ module.exports = function(app, express) {
 	var allowedRes = ["/login", "/"];
 	
 	if (allowedRes.indexOf(req.originalUrl) < 0) {
+	    console.log('=> Endpoint ' + req.originalUrl + ' needs token authentication');
 	    if (!req.headers.hasOwnProperty('authorization'))
 		res.send({'error': 'No token API provided'});
 	    User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
