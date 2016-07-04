@@ -1,0 +1,85 @@
+xvar User = require('../models/user');
+var Board_instance = require('../models/board_instance');
+var Promise = require('bluebird');
+
+exports._postL1 = function(req, res) {
+    var user = new User();
+	
+    user.name = req.body.name;
+    user.lava_url = req.body.lava_url;
+    user.short_location = req.body.short_location;
+    user.location_long = req.body.location_long;
+    user.location_lat = req.body.location_lat;
+    user.contact = req.body.contact;
+    user.status = req.body.status;
+	    
+    user.save(function(err) {
+	if (err)
+	    res.send(err);
+
+	res.json({ message: 'User created!' });
+    });	
+};
+
+exports._getL1 = function(req, res) {
+    User.find({}, function(err, users) {
+	if (err)
+	    res.send(err);
+	Promise.all(users.map(function(user) {
+	    return new Promise(function (resolve, reject) {
+		Board_instance.find({
+		    user_id: user
+		}, function (error, board_instances) {
+		    if (error) {
+			reject(error);
+			return;
+		    }
+		    var r = user.toObject();
+		    r.board_instances = Array();
+		    board_instances.forEach(function(item) {
+			r.board_instances.push(item._id);
+		    });
+		    resolve(r);
+		});
+	    });
+	})).then(function(fullUsers) {
+	    var o = Array();
+
+	    res.json(fullUsers);
+	});
+    });
+};
+
+exports._getL2 = function(req, res) {
+    User.findById(req.params.user_id, function(err, user) {
+	if (err)
+	    res.send(err);
+	res.json(user);
+    });
+};
+
+exports._putL2 = function(req, res) {
+    User.findById(req.params.user_id, function(err, user) { 
+	if (err)
+	    res.send(err);
+	    
+	user.name = req.body.name;
+	user.save(function(err) {
+	    if (err)
+		res.send(err);
+		
+	    res.json({ message: 'User updated!' });
+	});	    
+    });
+};
+
+exports._deleteL2 = function(req, res) {
+    User.remove({
+	_id: req.params.user_id
+    }, function(err, user) {
+	if (err)
+	    res.send(err);
+	    
+	res.json({ message: 'Successfully deleted' });
+    });
+};
