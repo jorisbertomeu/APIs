@@ -19,26 +19,6 @@ exports._postL1 = function(req, res) {
     });	
 };
 
-function linkCustomer(customer) {
-    return new Promise(function (resolve, reject) {
-	Board_instance.find({
-	    customer_id: customer
-	}, function (error, board_instances) {
-	    if (error) {
-		reject(error);
-		return;
-	    }
-	    var r = customer.toObject();
-	    r.board_instances = Array();
-	    board_instances.forEach(function(item) {
-		r.board_instances.push(item._id);
-	    });
-	    resolve(r);
-	});
-    });
-}
-
-
 exports._getL1 = function(req, res) {
     Customer.find({}, function(err, customers) {
 	if (err)

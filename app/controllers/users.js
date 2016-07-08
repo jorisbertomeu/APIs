@@ -85,7 +85,7 @@ exports._getL1 = function(req, res) {
 	if (!result) {
 	    Utils.sendUnauthorized(req, res);
 	    return;
-	};
+	}
 	User.find({}, function(err, users) {
 	    if (err)
 		res.send(err);
@@ -96,35 +96,53 @@ exports._getL1 = function(req, res) {
 
 
 exports._getL2 = function(req, res) {
-    User.findById(req.params.user_id, function(err, user) {
-	if (err)
-	    res.send(err);
-	res.json(user);
+    Utils.checkToken(req, res, false, req.params.user_id).then(function(result) {
+	if (!result) {
+	    Utils.sendUnauthorized(req, res);
+	    return;
+	}
+	User.findById(req.params.user_id, function(err, user) {
+	    if (err)
+		res.send(err);
+	    res.json(user);
+	});
     });
 };
 
 exports._putL2 = function(req, res) {
-    User.findById(req.params.user_id, function(err, user) { 
-	if (err)
-	    res.send(err);
-	    
-	user.name = req.body.name;
-	user.save(function(err) {
+    Utils.checkToken(req, res, false, req.params.user_id).then(function(result) {
+	if (!result) {
+	    Utils.sendUnauthorized(req, res);
+	    return;
+	}
+	User.findById(req.params.user_id, function(err, user) { 
 	    if (err)
 		res.send(err);
+	    
+	    user.name = req.body.name;
+	    user.save(function(err) {
+		if (err)
+		    res.send(err);
 		
-	    res.json({ message: 'User updated!' });
-	});	    
+		res.json({ message: 'User updated!' });
+	    });	    
+	});
     });
 };
 
 exports._deleteL2 = function(req, res) {
-    User.remove({
-	_id: req.params.user_id
-    }, function(err, user) {
-	if (err)
-	    res.send(err);
+    Utils.checkToken(req, res, true).then(function(result) {
+	if (!result) {
+	    Utils.sendUnauthorized(req, res);
+	    return;
+	}
+	User.remove({
+	    _id: req.params.user_id
+	}, function(err, user) {
+	    if (err)
+		res.send(err);
 	    
-	res.json({ message: 'Successfully deleted' });
+	    res.json({ message: 'Successfully deleted' });
+	});
     });
 };

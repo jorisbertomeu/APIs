@@ -1,13 +1,15 @@
 var User = require('./models/user');
 var Promise = require('bluebird');
 
-exports.checkToken = function(req, res, mustBeAdmin) {
+exports.checkToken = function(req, res, mustBeAdmin, userId) {
     return new Promise(function(resolve, reject) {
 	User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
 	    if (err)
 		reject(err);
 	    if (!user)
 		reject({'error': 'No user found for this token'});
+	    if (userId !== undefined && userId != user._id)
+		resolve(false);
 	    if (mustBeAdmin && user.isAdmin)
 		resolve(true);
 	    else if (mustBeAdmin && !user.isAdmin)
