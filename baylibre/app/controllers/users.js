@@ -98,18 +98,19 @@ exports._postL1_forgot = function(req, res) {
 	forgot.user_id = user.id;
 
 	try {
-	    var mail_text = Utils.loadFile(global.config.mail.templates.text);
-	    var mail_html = Utils.loadFile(global.config.mail.templates.html);
+	    var mail_text = Utils.loadFile(global.config.mail.forgotMail.templates.text);
+	    var mail_html = Utils.loadFile(global.config.mail.forgotMail.templates.html);
 	} catch (err) {
+	    console.log(err);
 	    return res.send({'error': 'Error while fetching mail template', 'details': err});
 	}
 	forgot.save(function(err) {
 	    if (err)
 		res.send(err);
 	    var mailOptions = {
-		from: '"PowerCI"<no-reply@powerci.org>',
+		from: '"'+global.config.mail.forgotMail.settings.fromName+'"<'+global.config.mail.forgotMail.settings.fromAddress+'>',
 		to: user.email,
-		subject: 'Password Reset Request',
+		subject: global.config.mail.forgotMail.settings.subject,
 		text: Utils.parseMail(mail_text, user, forgot, req, forgotHash),
 		html: Utils.parseMail(mail_html, user, forgot, req, forgotHash)
 	    };

@@ -1,14 +1,21 @@
 {
     "mail": {
+	"forgotMail": {
+	    "settings": {
+		"fromName": "PowerCI",
+		"fromAddress": "contact@powerci.org",
+		"subject": "Password reset request"
+	    },
+	    "templates": {
+		"html": "./templates/mail_html.html",
+		"text": "./templates/mail_text.txt"
+	    }
+	},
 	"smtp": {
 	    "server": "powerci.org",
 	    "port": 587,
 	    "user": "mail@powerci.org",
 	    "password": "powerci"
-	},
-	"templates": {
-	    "html": "./templates/mail_html.html",
-	    "text": "./templates/mail_text.txt"
 	}
     }
 }

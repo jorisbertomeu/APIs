@@ -29,14 +29,6 @@ exports.replaceAll = function(str, find, replace) {
     return str.replace(new RegExp(find, 'g'), replace);
 }
 
-/*
-  Keywords mapping :
-  %username% = username - user.username
-  %ip% = Origin IP address - req.connection.remoteAddress
-  %forgotid% = Mongo ID of forgot instance - forgot.id
-  %hash% = Forgot hash - hash
-*/
-
 exports.parseMail = function(mail, user, forgot, req, hash) {
     var me = require('./utils');
 
@@ -51,7 +43,7 @@ exports.loadFile = function(filename) {
     var data = null;
 
     try {
-	data = JSON.parse(fs.readFileSync(filename));
+	data = fs.readFileSync(filename, 'utf8');
 	return data;
     } catch (err) {
 	console.log('There has been an error when fetching file \''+filename+'\'')
