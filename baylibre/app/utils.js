@@ -1,5 +1,6 @@
 var User = require('./models/user');
 var Promise = require('bluebird');
+var fs = require('fs');
 
 exports.checkToken = function(req, res, mustBeAdmin, userId) {
     return new Promise(function(resolve, reject) {
@@ -38,9 +39,24 @@ exports.replaceAll = function(str, find, replace) {
 
 exports.parseMail = function(mail, user, forgot, req, hash) {
     var me = require('./utils');
+
     mail = me.replaceAll(mail, "%username%", user.username);
     mail = me.replaceAll(mail, "%ip%", req.connection.remoteAddress);
     mail = me.replaceAll(mail, "%forgotid%", forgot.id);
     mail = me.replaceAll(mail, "%hash%", hash);
     return mail;
+}
+
+exports.loadFile = function(filename) {
+    var data = null;
+
+    try {
+	data = JSON.parse(fs.readFileSync(filename));
+	return data;
+    } catch (err) {
+	console.log('There has been an error when fetching file \''+filename+'\'')
+	console.log(err);
+	console.log('this is the end');
+	throw err;
+    }
 }

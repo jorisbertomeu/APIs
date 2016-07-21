@@ -96,7 +96,13 @@ exports._postL1_forgot = function(req, res) {
 	forgot.hash = forgotHash;
 	forgot.ip = req.connection.remoteAddress;
 	forgot.user_id = user.id;
-	
+
+	try {
+	    var mail_text = Utils.loadFile(global.config.mail.templates.text);
+	    var mail_html = Utils.loadFile(global.config.mail.templates.html);
+	} catch (err) {
+	    return res.send({'error': 'Error while fetching mail template', 'details': err});
+	}
 	forgot.save(function(err) {
 	    if (err)
 		res.send(err);
@@ -104,8 +110,8 @@ exports._postL1_forgot = function(req, res) {
 		from: '"PowerCI"<no-reply@powerci.org>',
 		to: user.email,
 		subject: 'Password Reset Request',
-		text: Utils.parseMail(global.config.mail.templates.text, user, forgot, req, forgotHash),
-		html: Utils.parseMail(global.config.mail.templates.html, user, forgot, req, forgotHash)
+		text: Utils.parseMail(mail_text, user, forgot, req, forgotHash),
+		html: Utils.parseMail(mail_html, user, forgot, req, forgotHash)
 	    };
 	    res.json({"message": "Reset password link for "+user.username+" will be sent to "+user.email});
 	    transporter.sendMail(mailOptions, function(error, info) {
