@@ -76,12 +76,12 @@ exports._postL1_forgot = function(req, res) {
 	}
 	var transporter = nodemailer.createTransport(
 	    smtpTransport({
-		host: "powerci.org",
+		host: global.config.mail.smtp.server,
 		secure: false,
-		port: 587,
+		port: global.config.mail.smtp.port,
 		auth: {
-		    user: "mail@powerci.org",
-		    pass: "powerci"
+		    user: global.config.mail.smtp.user,
+		    pass: global.config.mail.smtp.password
 		},
 		tls: {rejectUnauthorized: false},
 		debug:true
@@ -104,8 +104,8 @@ exports._postL1_forgot = function(req, res) {
 		from: '"PowerCI"<no-reply@powerci.org>',
 		to: user.email,
 		subject: 'Password Reset Request',
-		text: 'Hi, '+user.username+', You recently requested to reset your password for your PowerCI account ('+req.connection.remoteAddress+'). Copy the link to reset it : http://powerci.org/forgot?v='+forgot.id+'&h='+forgotHash+'. If you did not request a password reset, please ignore this email or reply to let us know. This password reset is only valid for the next 30 minutes. © 2016 PowerCI. All rights reserved. PowerCI - http://powerci.org/',
-		html: '<div style="width:70%;margin-left:15%"><div style="text-align:center;background-color:#F3F5F7;padding:1%"><h1>PowerCI</h1></div><div style="width:70%;margin-left:15%"><h2>Hi '+user.username+',</h2><br>You recently requested to reset your password for your PowerCI account ('+req.connection.remoteAddress+'). Click the link below to reset it.<br><br><center><a href="http://powerci.org/forgot?v='+forgot.id+'&h='+forgotHash+'">Reset your password</a></center><br><br>If you did not request a password reset, please ignore this email or reply to let us know. This password reset is only valid for the next 30 minutes.</div><br><br><div style="text-align:center;background-color:#F3F5F7;padding:4%">© 2016 PowerCI. All rights reserved.<br>PowerCI - <a href="http://powerci.org/">http://powerci.org/</a></div></div>'
+		text: Utils.parseMail(global.config.mail.templates.text, user, forgot, req, forgotHash),
+		html: Utils.parseMail(global.config.mail.templates.html, user, forgot, req, forgotHash)
 	    };
 	    res.json({"message": "Reset password link for "+user.username+" will be sent to "+user.email});
 	    transporter.sendMail(mailOptions, function(error, info) {

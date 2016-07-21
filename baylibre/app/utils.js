@@ -23,3 +23,24 @@ exports.sendUnauthorized = function(req, res) {
     res.status(403);
     res.send({'error': 'Your user is not allowed to access to this resource'});
 };
+
+exports.replaceAll = function(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
+/*
+  Keywords mapping :
+  %username% = username - user.username
+  %ip% = Origin IP address - req.connection.remoteAddress
+  %forgotid% = Mongo ID of forgot instance - forgot.id
+  %hash% = Forgot hash - hash
+*/
+
+exports.parseMail = function(mail, user, forgot, req, hash) {
+    var me = require('./utils');
+    mail = me.replaceAll(mail, "%username%", user.username);
+    mail = me.replaceAll(mail, "%ip%", req.connection.remoteAddress);
+    mail = me.replaceAll(mail, "%forgotid%", forgot.id);
+    mail = me.replaceAll(mail, "%hash%", hash);
+    return mail;
+}
