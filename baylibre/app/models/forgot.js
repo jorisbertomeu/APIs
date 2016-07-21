@@ -4,6 +4,7 @@ var Schema       = mongoose.Schema, ObjectId = Schema.ObjectId;
 var ForgotSchema   = new Schema({
     username: String,
     date: Number,
+    used: Boolean,
     hash: String,
     user_id: ObjectId,
     ip: String

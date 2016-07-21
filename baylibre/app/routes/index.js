@@ -72,8 +72,8 @@ module.exports = function(app, express) {
 	.get(UsersController._getL1);
     router.route('/forgot')
 	.post(UsersController._postL1_forgot);
-    router.route('/forgot/:forgot_id')
-	.post(UsersController._postL2_forgot);
+    router.route('/forgot/:forgot_id/:hash')
+	.get(UsersController._getL3_forgot);
     router.route('/login')
 	.post(UsersController._postL1_login);
     router.route('/logout')

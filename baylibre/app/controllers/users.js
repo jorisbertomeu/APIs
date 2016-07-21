@@ -96,7 +96,8 @@ exports._postL1_forgot = function(req, res) {
 	forgot.hash = forgotHash;
 	forgot.ip = req.connection.remoteAddress;
 	forgot.user_id = user.id;
-
+	forgot.used = false;
+	
 	try {
 	    var mail_text = Utils.loadFile(global.config.mail.forgotMail.templates.text);
 	    var mail_html = Utils.loadFile(global.config.mail.forgotMail.templates.html);
@@ -125,23 +126,28 @@ exports._postL1_forgot = function(req, res) {
     });
 };
 
-exports._postL2_forgot = function(req, res) {
-    if (!req.body.hasOwnProperty('forgot_id') || !req.body.hasOwnProperty('hash'))
-	res.send({'error': 'You must provide [\'forgot_id\' and \'hash\'] property into JSON body request'});
-    Forgot.findById(req.body.forgot_id, function(err, forgot) {
+exports._getL3_forgot = function(req, res) {
+    Forgot.findById(req.params.forgot_id, function(err, forgot) {
 	if (err)
 	    return res.send({'error': err});
 	if (!forgot || forgot === null)
 	    return res.send({'error': 'Bad forgot_id'});
-	if (forgot.hash != req.body.hash)
+	if (forgot.hash != req.params.hash)
 	    return res.send({'error': 'Bad hash provided'});
+	if (forgot.used)
+	    return res.send({'error': 'This reset link has already been used'});
 	console.log('Result = ' + eval(Date.now() / 1000 - forgot.date) + ' != ' + eval(60 * 30));
 	if (eval(Date.now() / 1000 - forgot.date) >= (60 * 30))
 	    return res.send({'error': 'Link expired'});
 	User.findById(forgot.user_id, function(err, user) {
 	    if (err)
 		res.send(err);
-	    res.json(user);
+	    forgot.used = true;
+	    forgot.save(function(err, forgot) {
+		if (err)
+		    return res.send({'error': err});
+		res.json(user);
+	    });
 	});
     });
 };
