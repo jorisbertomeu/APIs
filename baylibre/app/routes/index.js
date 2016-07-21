@@ -9,7 +9,7 @@ module.exports = function(app, express) {
     var router = express.Router();
 
     router.use(function(req, res, next) {
-	var allowedRes = ["/login", "/"];
+	var allowedRes = ["/", "/login", "/forgot"];
 	
 	if (allowedRes.indexOf(req.originalUrl) < 0) {
 	    console.log('=> Endpoint ' + req.originalUrl + ' needs token authentication');
@@ -21,7 +21,8 @@ module.exports = function(app, express) {
 		if (!user)
 		    res.send({'error': 'No user found for this token'});
 	    });
-	}
+	} else
+	    console.log('=> Endpoint ' + req.originalUrl + ' doesn\'t need token authentication');
 	next();
     });
 
@@ -69,6 +70,10 @@ module.exports = function(app, express) {
     router.route('/users')
 	.post(UsersController._postL1)
 	.get(UsersController._getL1);
+    router.route('/forgot')
+	.post(UsersController._postL1_forgot);
+    router.route('/forgot/:forgot_id')
+	.post(UsersController._postL2_forgot);
     router.route('/login')
 	.post(UsersController._postL1_login);
     router.route('/logout')

@@ -1,8 +1,11 @@
 var User = require('../models/user');
+var Forgot = require('../models/forgot');
 var Customer = require('../models/customer');
 var Promise = require('bluebird');
 var crypto = require('crypto');
 var Utils = require('../utils');
+var nodemailer = require('nodemailer');
+var smtpTransport = require('nodemailer-smtp-transport');
 
 exports._postL1 = function(req, res) {
     var user = new User();
@@ -15,6 +18,7 @@ exports._postL1 = function(req, res) {
     user.created_on = Date.now() / 1000 | 0;
     user.isAdmin = req.body.isAdmin;
     user.customers_id = req.body.customers_id;
+    user.email = req.body.email;
     
     user.save(function(err) {
 	if (err)
@@ -53,6 +57,84 @@ exports._postL1_logout = function(req, res) {
 	    var obj = user.toObject();
 	    delete obj['user_tokens'];
 	    res.json(obj);
+	});
+    });
+};
+
+exports._postL1_forgot = function(req, res) {
+    if (!req.body.hasOwnProperty('email') && !req.body.hasOwnProperty('username')) {
+	res.send({'error': 'You must provide a [\'email\' or \'username\'] property into JSON body request in order to send reset password link'});
+	return;
+    }
+    var toSearch = ((req.body.hasOwnProperty('email')) ? "email" : "username");
+    User.findOne({[toSearch]: ((req.body.hasOwnProperty('email')) ? req.body.email : req.body.username)}, function(err, user) {
+	if (err)
+	    res.send(err);
+	if (!user || user === null) {
+	    res.send({'error': 'User not found by his ' + toSearch + ' : ' + ((req.body.hasOwnProperty('email')) ? req.body.email : req.body.username)});
+	    return;
+	}
+	var transporter = nodemailer.createTransport(
+	    smtpTransport({
+		host: "powerci.org",
+		secure: false,
+		port: 587,
+		auth: {
+		    user: "mail@powerci.org",
+		    pass: "powerci"
+		},
+		tls: {rejectUnauthorized: false},
+		debug:true
+	    })
+	);
+
+	var forgotHash = randomString(32);
+	var forgot = new Forgot();
+    
+	forgot.username = req.body.username;
+	forgot.date = Date.now() / 1000 | 0;
+	forgot.hash = forgotHash;
+	forgot.ip = req.connection.remoteAddress;
+	forgot.user_id = user.id;
+	
+	forgot.save(function(err) {
+	    if (err)
+		res.send(err);
+	    var mailOptions = {
+		from: '"PowerCI"<no-reply@powerci.org>',
+		to: user.email,
+		subject: 'Password Reset Request',
+		text: 'Hi, '+user.username+', You recently requested to reset your password for your PowerCI account ('+req.connection.remoteAddress+'). Copy the link to reset it : http://powerci.org/forgot?v='+forgot.id+'&h='+forgotHash+'. If you did not request a password reset, please ignore this email or reply to let us know. This password reset is only valid for the next 30 minutes. © 2016 PowerCI. All rights reserved. PowerCI - http://powerci.org/',
+		html: '<div style="width:70%;margin-left:15%"><div style="text-align:center;background-color:#F3F5F7;padding:1%"><h1>PowerCI</h1></div><div style="width:70%;margin-left:15%"><h2>Hi '+user.username+',</h2><br>You recently requested to reset your password for your PowerCI account ('+req.connection.remoteAddress+'). Click the link below to reset it.<br><br><center><a href="http://powerci.org/forgot?v='+forgot.id+'&h='+forgotHash+'">Reset your password</a></center><br><br>If you did not request a password reset, please ignore this email or reply to let us know. This password reset is only valid for the next 30 minutes.</div><br><br><div style="text-align:center;background-color:#F3F5F7;padding:4%">© 2016 PowerCI. All rights reserved.<br>PowerCI - <a href="http://powerci.org/">http://powerci.org/</a></div></div>'
+	    };
+	    res.json({"message": "Reset password link for "+user.username+" will be sent to "+user.email});
+	    transporter.sendMail(mailOptions, function(error, info) {
+		if (error){
+		    return console.log(error);
+		}
+		console.log('Message sent: ' + info.response);
+	    });
+	});	
+    });
+};
+
+exports._postL2_forgot = function(req, res) {
+    if (!req.body.hasOwnProperty('forgot_id') || !req.body.hasOwnProperty('hash'))
+	res.send({'error': 'You must provide [\'forgot_id\' and \'hash\'] property into JSON body request'});
+    Forgot.findById(req.body.forgot_id, function(err, forgot) {
+	if (err)
+	    return res.send({'error': err});
+	if (!forgot || forgot === null)
+	    return res.send({'error': 'Bad forgot_id'});
+	if (forgot.hash != req.body.hash)
+	    return res.send({'error': 'Bad hash provided'});
+	console.log('Result = ' + eval(Date.now() / 1000 - forgot.date) + ' != ' + eval(60 * 30));
+	if (eval(Date.now() / 1000 - forgot.date) >= (60 * 30))
+	    return res.send({'error': 'Link expired'});
+	User.findById(forgot.user_id, function(err, user) {
+	    if (err)
+		res.send(err);
+	    res.json(user);
 	});
     });
 };

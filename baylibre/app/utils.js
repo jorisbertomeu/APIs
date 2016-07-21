@@ -6,7 +6,7 @@ exports.checkToken = function(req, res, mustBeAdmin, userId) {
 	User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
 	    if (err)
 		reject(err);
-	    if (!user)
+	    if (!user || user === null)
 		reject({'error': 'No user found for this token'});
 	    if (userId !== undefined && userId != user._id)
 		resolve(false);
