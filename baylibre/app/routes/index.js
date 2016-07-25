@@ -16,7 +16,7 @@ module.exports = function(app, express) {
 	if (!Utils.publicAccess(allowedRes, req.originalUrl)) {
 	    console.log('=> Endpoint ' + req.originalUrl + ' needs token authentication');
 	    if (!req.headers.hasOwnProperty('authorization'))
-	 	res.send({'error': 'No token API provided'});
+	 	return res.send({'error': 'No token API provided'});
 	    User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
 		if (err)
 		    return res.send(err);
