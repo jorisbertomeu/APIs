@@ -3,7 +3,8 @@ var Utils = require('../utils');
 
 exports._postL1 = function(req, res) {
     var board_instance = new Board_instance();
-
+    var missing;
+    
     Utils.checkToken(req, res, true).then(function(result) {
 	if (!result) {
 	    Utils.sendUnauthorized(req, res);
