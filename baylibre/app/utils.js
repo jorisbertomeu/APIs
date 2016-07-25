@@ -6,16 +6,16 @@ exports.checkToken = function(req, res, mustBeAdmin, userId) {
     return new Promise(function(resolve, reject) {
 	User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
 	    if (err)
-		reject(err);
+		return reject(err);
 	    if (!user || user === null)
-		resolve(false);
+		return resolve(false);
 	    if (userId !== undefined && userId != user._id)
-		resolve(false);
+		return resolve(false);
 	    if (mustBeAdmin && user.isAdmin)
-		resolve(true);
+		return resolve(true);
 	    else if (mustBeAdmin && !user.isAdmin)
-		resolve(false);
-	    resolve(true);
+		return resolve(false);
+	    return resolve(true);
 	});
     });
 };
