@@ -6,16 +6,16 @@ exports.checkToken = function(req, res, mustBeAdmin, userId) {
     return new Promise(function(resolve, reject) {
 	User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
 	    if (err)
-		reject(err);
+		return reject(err);
 	    if (!user || user === null)
-		reject({'error': 'No user found for this token'});
+		return resolve(false);
 	    if (userId !== undefined && userId != user._id)
-		resolve(false);
+		return resolve(false);
 	    if (mustBeAdmin && user.isAdmin)
-		resolve(true);
+		return resolve(true);
 	    else if (mustBeAdmin && !user.isAdmin)
-		resolve(false);
-	    resolve(true);
+		return resolve(false);
+	    return resolve(true);
 	});
     });
 };
@@ -66,7 +66,7 @@ exports.checkFields = function(o, fields) {
 exports.publicAccess = function(tab, res) {
     var baseEndpoint = res.split('/');
     console.log('Searching for endpoint \'/' + baseEndpoint[1] + '\'');
-    if (tab.indexOf('/' + baseEndpoint[1]) > 0) {
+    if (tab.indexOf('/' + baseEndpoint[1]) >= 0) {
 	return true;
     }    
     return false;
