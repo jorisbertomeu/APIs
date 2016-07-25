@@ -52,3 +52,23 @@ exports.loadFile = function(filename) {
 	throw err;
     }
 }
+
+exports.checkFields = function(o, fields) {
+    var missing = [];
+
+    fields.forEach(function(item) {
+	if (!o.hasOwnProperty(item))
+	    missing.push(item);
+    });
+    return missing;
+}
+
+exports.publicAccess = function(tab, res) {
+    var baseEndpoint = res.split('/');
+    console.log(baseEndpoint);
+    if (tab.indexOf('/' + baseEndpoint[1]) > 0) {
+	return true;
+    }
+    
+    return false;
+}

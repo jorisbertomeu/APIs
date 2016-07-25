@@ -4,22 +4,25 @@ var Board_instancesController = require('../controllers/board_instances');
 var CustomersController = require('../controllers/customers');
 var UsersController = require('../controllers/users');
 var User = require('../models/user');
+var Utils = require('../utils');
 
 module.exports = function(app, express) {
     var router = express.Router();
-
+    var tmp = 0;
+    
     router.use(function(req, res, next) {
 	var allowedRes = ["/", "/login", "/forgot"];
 	
-	if (allowedRes.indexOf(req.originalUrl) < 0) {
+	if (!Utils.publicAccess(allowedRes, req.originalUrl)) {
 	    console.log('=> Endpoint ' + req.originalUrl + ' needs token authentication');
 	    if (!req.headers.hasOwnProperty('authorization'))
-		res.send({'error': 'No token API provided'});
+	 	res.send({'error': 'No token API provided'});
 	    User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
 		if (err)
-		    res.send(err);
-		if (!user)
-		    res.send({'error': 'No user found for this token'});
+		    return res.send(err);
+		if (!user) {
+		    return res.send({'error': 'No user found for this token'});
+		}
 	    });
 	} else
 	    console.log('=> Endpoint ' + req.originalUrl + ' doesn\'t need token authentication');

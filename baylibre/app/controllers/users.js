@@ -10,8 +10,11 @@ var smtpTransport = require('nodemailer-smtp-transport');
 exports._postL1 = function(req, res) {
     var user = new User();
     var shasum = crypto.createHash('sha1');
+    var missing;
     
-    
+    missing = Utils.checkFields(req.body, ["username", "password", "isAdmin", "customers", "email"]);
+    if (missing.length != 0)
+	return res.send({'error': "Missing followwing properties : " + missing});
     user.username = req.body.username;
     shasum.update(req.body.password);
     user.password = shasum.digest('hex');
