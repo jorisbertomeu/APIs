@@ -3,6 +3,7 @@ var LabsController = require('../controllers/labs');
 var Board_instancesController = require('../controllers/board_instances');
 var CustomersController = require('../controllers/customers');
 var UsersController = require('../controllers/users');
+var ProjectController = require('../controllers/projects');
 var User = require('../models/user');
 var Utils = require('../utils');
 
@@ -85,6 +86,10 @@ module.exports = function(app, express) {
 	.get(UsersController._getL2)
 	.delete(UsersController._deleteL2)
 	.put(UsersController._putL2);
+
+	/* PROJECT RES */
+	router.route('/project')
+	.post(ProjectController._postL1);
     
     app.use('/', router);
 };
