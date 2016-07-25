@@ -66,7 +66,7 @@ exports.checkFields = function(o, fields) {
 exports.publicAccess = function(tab, res) {
     var baseEndpoint = res.split('/');
     console.log('Searching for endpoint \'/' + baseEndpoint[1] + '\'');
-    if (tab.indexOf('/' + baseEndpoint[1]) > 0) {
+    if (tab.indexOf('/' + baseEndpoint[1]) >= 0) {
 	return true;
     }    
     return false;
