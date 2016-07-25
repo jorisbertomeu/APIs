@@ -7,6 +7,7 @@ var Promise = require('bluebird');
 var fs = require('fs');
 var data = fs.readFileSync('./config.json');
 
+
 try {
     global.config = JSON.parse(data);
     console.dir(global.config);
