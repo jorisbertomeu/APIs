@@ -8,7 +8,7 @@ exports.checkToken = function(req, res, mustBeAdmin, userId) {
 	    if (err)
 		reject(err);
 	    if (!user || user === null)
-		reject({'error': 'No user found for this token'});
+		resolve(false);
 	    if (userId !== undefined && userId != user._id)
 		resolve(false);
 	    if (mustBeAdmin && user.isAdmin)
