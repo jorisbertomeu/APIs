@@ -9,7 +9,7 @@ exports.checkToken = function(req, res, mustBeAdmin, userId) {
 		return reject(err);
 	    if (!user || user === null)
 		return resolve(false);
-	    if (userId !== undefined && userId != user._id)
+	    if (userId !== undefined && userId.toString() != user._id.toString())
 		return resolve(false);
 	    if (mustBeAdmin && user.isAdmin)
 		return resolve(true);

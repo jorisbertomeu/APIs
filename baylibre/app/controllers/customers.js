@@ -10,6 +10,7 @@ exports._postL1 = function(req, res) {
     customer.address = req.body.address;
     customer.telephone = req.body.telephone;
     customer.board_instances = req.body.board_instances;
+    customer.users_id = req.body.users_id;
     
     customer.save(function(err) {
 	if (err)
