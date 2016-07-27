@@ -5,7 +5,8 @@ var CustomerSchema   = new Schema({
     name: String,
     company: String,
     address: String,
-    telephone: String
+    telephone: String,
+    users_id : [ObjectId]
 });
 
 module.exports = mongoose.model('Customer', CustomerSchema);

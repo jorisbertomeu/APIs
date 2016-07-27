@@ -88,8 +88,13 @@ module.exports = function(app, express) {
 	.put(UsersController._putL2);
 
 	/* PROJECT RES */
-	router.route('/project')
-	.post(ProjectController._postL1);
+	router.route('/projects')
+	.post(ProjectController._postL1)
+	.get(ProjectController._getL1);
+	router.route('/projects/:project_id')
+	.get(ProjectController._getL2)
+	.put(ProjectController._putL2)
+	.delete(ProjectController._deleteL2);
     
     app.use('/', router);
 };
