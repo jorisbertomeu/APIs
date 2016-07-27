@@ -2,6 +2,8 @@ var User = require('./models/user');
 var Promise = require('bluebird');
 var fs = require('fs');
 var Customer = require('./models/customer');
+var nodemailer = require('nodemailer');
+var smtpTransport = require('nodemailer-smtp-transport');
 
 exports.checkToken = function(req, res, mustBeAdmin, userId) {
     return new Promise(function(resolve, reject) {
@@ -45,13 +47,21 @@ exports.replaceAll = function(str, find, replace) {
     return str.replace(new RegExp(find, 'g'), replace);
 }
 
-exports.parseMail = function(mail, user, forgot, req, hash) {
+exports.parseForgotMail = function(mail, user, forgot, req, hash) {
     var me = require('./utils');
 
     mail = me.replaceAll(mail, "%username%", user.username);
     mail = me.replaceAll(mail, "%ip%", req.connection.remoteAddress);
     mail = me.replaceAll(mail, "%forgotid%", forgot.id);
     mail = me.replaceAll(mail, "%hash%", hash);
+    return mail;
+}
+
+exports.parseWelcomeMail = function(mail, user, req) {
+    var me = require('./utils');
+
+    mail = me.replaceAll(mail, "%username%", user.username);
+    mail = me.replaceAll(mail, "%ip%", req.connection.remoteAddress);
     return mail;
 }
 
@@ -87,3 +97,19 @@ exports.publicAccess = function(tab, res) {
     }    
     return false;
 }
+
+exports.getMailTransporter = function() {
+    return transporter = nodemailer.createTransport(
+	smtpTransport({
+	    host: global.config.mail.smtp.server,
+	    secure: false,
+	    port: global.config.mail.smtp.port,
+	    auth: {
+		user: global.config.mail.smtp.user,
+		pass: global.config.mail.smtp.password
+	    },
+	    tls: {rejectUnauthorized: false},
+	    debug:true
+	})
+    );
+};
