@@ -1,6 +1,8 @@
 var Customer = require('../models/customer');
 var Board_instance = require('../models/board_instance');
 var Promise = require('bluebird');
+var Lab = require('../models/lab');
+var Board = require('../models/board');
 
 exports._postL1 = function(req, res) {
     var customer = new Customer();
@@ -25,9 +27,7 @@ exports._getL1 = function(req, res) {
 	    res.send(err);
 	Promise.all(customers.map(function(customer) {
 	    return new Promise(function (resolve, reject) {
-		Board_instance.find({
-		    customer_id: customer
-		}, function (error, board_instances) {
+		Board_instance.find({customer_id: customer}, function (error, board_instances) {
 		    if (error) {
 			reject(error);
 			return;
@@ -56,8 +56,23 @@ exports._getL2 = function(req, res) {
 	    if (err)
 		res.send(err);
 	    var r = customer.toObject();
-	    r.board_instances = board_instances;
-	    res.json(r);
+
+	    Promise.all(board_instances.map(function(board_instance) {
+		return new Promise(function(resolve, reject) {
+		    Lab.findById(board_instance.lab_id, function(err, lab) {
+			var i = board_instance.toObject();
+			    
+			i.lab_id = lab;
+			Board.findById(board_instance.board_id, function(err, board) {
+			    i.board_id = board;
+			    resolve(i);
+			});
+		    });
+		});
+	    })).then(function(fullBoardInstances) {
+		r.board_instances = fullBoardInstances;
+		res.json(r);
+	    });;
 	});
     });
 };
