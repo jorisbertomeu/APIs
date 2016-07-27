@@ -6,9 +6,10 @@ var TestCaseSchema = new Schema({
 	title : String,
 	description : String,
 	target : Number,
-	current : double,
+	current : Number,
 	unit : String,
-	trend : String
+	trend : String,
+	created_on : Number
 
 });
 

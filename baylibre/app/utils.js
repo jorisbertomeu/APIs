@@ -1,6 +1,7 @@
 var User = require('./models/user');
 var Promise = require('bluebird');
 var fs = require('fs');
+var Customer = require('./models/customer');
 
 exports.checkToken = function(req, res, mustBeAdmin, userId) {
     return new Promise(function(resolve, reject) {
@@ -9,14 +10,29 @@ exports.checkToken = function(req, res, mustBeAdmin, userId) {
 		return reject(err);
 	    if (!user || user === null)
 		return resolve(false);
-	    if (userId !== undefined && userId.toString() != user._id.toString())
-		return resolve(false);
+        if(userId instanceof Array) {
+            if(userId !== undefined && (userId.indexOf(User) != -1)) 
+                return resolve(true);
+        } else {
+    	    if (userId !== undefined && userId.toString() != user._id.toString())
+    		return resolve(false);
+        }
 	    if (mustBeAdmin && user.isAdmin)
 		return resolve(true);
 	    else if (mustBeAdmin && !user.isAdmin)
 		return resolve(false);
 	    return resolve(true);
 	});
+    });
+};
+
+exports.getUsersByCustomer = function(customer_id) {
+    return new Promise(function(resolve, reject) {
+        User.find({customers_id: {"$in": [customer_id]}}, function(err, users) {
+            if (err)
+                reject(err);
+            resolve(users);
+        });
     });
 };
 
@@ -43,13 +59,13 @@ exports.loadFile = function(filename) {
     var data = null;
 
     try {
-	data = fs.readFileSync(filename, 'utf8');
-	return data;
+    	data = fs.readFileSync(filename, 'utf8');
+    	return data;
     } catch (err) {
-	console.log('There has been an error when fetching file \''+filename+'\'')
-	console.log(err);
-	console.log('this is the end');
-	throw err;
+    	console.log('There has been an error when fetching file \''+filename+'\'')
+    	console.log(err);
+    	console.log('this is the end');
+    	throw err;
     }
 }
 

@@ -4,6 +4,7 @@ var Board_instancesController = require('../controllers/board_instances');
 var CustomersController = require('../controllers/customers');
 var UsersController = require('../controllers/users');
 var ProjectController = require('../controllers/projects');
+var TestCaseController = require('../controllers/test_case')
 var User = require('../models/user');
 var Utils = require('../utils');
 
@@ -95,6 +96,17 @@ module.exports = function(app, express) {
 	.get(ProjectController._getL2)
 	.put(ProjectController._putL2)
 	.delete(ProjectController._deleteL2);
+
+	/* Test case*/
+	/*
+	router.route('/test_case')
+	.post(TestCaseController._postL1)
+	.get(TestCaseController._getL1);
+	router.route('/test_case/:test_case_id')
+	.post(TestCaseController._post_L2)
+	.get(TestCaseController._getL2)
+	.delete(TestCaseController._deleteL2)
+		*/
     
     app.use('/', router);
 };
