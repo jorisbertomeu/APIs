@@ -1,5 +1,4 @@
 // Mapped Objects
-var Project = require('../models/project');
 var TestCase = require('../models/test_case')
 
 // Modules
@@ -71,89 +70,122 @@ exports._getL1= function(req, res) {
 
 // Get test case by Id
 exports._getL2 = function(req, res) {
-	
-};
 
-// Update project
-exports._postL2 = function(req, res) {
-
-	// Check request parms
-	missing = Utils.checkFields(req.body, ["name", "description"]);
-	if(missing.length !=0) 
-		return res.send({'error' : "Missing followwing properties : " + missing});
-	// Get project by Id
-	Project.findById(req.params.project_id, function(err, project){
+	// Check user token
+	Utils.checkToken(req, res, true).then (function(result) {
+		if(!result) {
+			Utils.sendUnauthorized(req, res);
+			return;
+		}
+		// Get test case by Id
+		TestCase.findById(req.params.test_case_id, function(err, testCase){
 			if(err)
 				res.send(err);
-			else if (project != null) {
-				// Get custmer by Id
-				Customer.findById(project.customer_id, function(err, customer){
+				// Get result
+			res.json(testCase);
+		});
+	});
+};
+
+// Update test case
+exports._putL2 = function(req, res) {
+
+	// Check user token
+	Utils.checkToken(req, res, true).then (function(result) {
+		if(!result) {
+			Utils.sendUnauthorized(req, res);
+			return;
+		}
+
+		// Get test case by Id
+		TestCase.findById(req.params.test_case_id, function(err, testCase){
+			if(err)
+				res.send(err);
+
+			 if (testCase != null) {
+				// Mapping params
+				if(req.body.status !== undefined && req.body.status != "") {
+					testCase.status 		= req.body.status;
+				}
+				if(req.body.title !== undefined && req.body.title != "") {
+					testCase.title 		= req.body.title;
+				}
+				if(req.body.description !== undefined && req.body.description != "") {
+					testCase.description 		= req.body.description;
+				}
+				if(req.body.target !== undefined && req.body.target != "") {
+					testCase.target 		= req.body.target;
+				}
+				if(req.body.current !== undefined && req.body.current != "") {
+					testCase.current 		= req.body.current;
+				}
+				if(req.body.unit !== undefined && req.body.unit != "") {
+					testCase.unit 		= req.body.unit;
+				}
+				if(req.body.trend !== undefined && req.body.trend != "") {
+					testCase.trend 		= req.body.trend;
+				}
+
+				// Update test case
+				testCase.save(function(err) {
 					if(err)
 						res.send(err);
-					// check if customer is not null
-					else if(customer != null) {
+					res.json({message : 'Test Case updated!'});
+				});
+						
+			} else 
+				res.json({message : 'Test case not found!'});
+		});
+	});
+};
 
-						// Check user token
-						Utils.checkToken(req, res, false, customer.users_id).then (function(result) {
-							if(!result) {
-								Utils.sendUnauthorized(req, res);
-								return;
-							}
-							// Mapping params
-							project.name = req.body.name;
-							project.description = req.body.description;
+// Update test case
+exports._deleteL2 = function(req, res) {
 
-							// Update project
-							project.save(function(err) {
-								if(err)
-									res.send(err);
-								res.json({message : 'project updated!'});
-							});
-						});
-					} else 
-					// No customer found for this project
-					res.json({message : 'Customer not found for this project!'});
+	// Check user token
+	Utils.checkToken(req, res, true).then (function(result) {
+		if(!result) {
+			Utils.sendUnauthorized(req, res);
+			return;
+		}
 
+		// Get test case by Id
+		TestCase.findById(req.params.test_case_id, function(err, testCase){
+			if(err)
+				res.send(err);
+			if(testCase != null) {
+				// delete test case
+				TestCase.remove({_id : req.params.test_case_id }, function(err, testCase) {
+					if(err)
+						res.send(err);
+					res.json({message : 'test case saccessfully deleted!'});
 				});
 			} else 
-			// No project found for this Id
-			res.json({message : 'Project not found!'});
+				res.json({message : 'Test case not found!'});
+		});
+
 	});
 };
 
-// Update project
-exports._deleteL2 = function(req, res) {
-	// Get project by Id
-	Project.findById(req.params.project_id, function(err, project){
-		if(err)
-			res.send(err);
-		else if(project != null) {
-	
-			// Get custmer by Id
-			Customer.findById(project.customer_id, function(err, customer){
-				if(err) 
-					res.send(err);
-				else if(customer != null) {
-					// Check user token
-					
-					Utils.checkToken(req, res, false, customer.users_id).then (function(result) {
-						if(!result) {
-							Utils.sendUnauthorized(req, res);
-							return;
-						}
-						// delete project
-						project.remove({_id : req.params.project_id }, function(err) {
-							if(err)
-								res.send(err);
-							res.json({message : 'project saccessfully deleted!'});
-						});
-					});
-				} else 
-					// No customer found for this project
-					res.json({message : 'Customer not found for this project!'});
-			});
-		} else 
-			// No project found for this Id
-			res.json({message : 'Project not found!'});
-	});
-};
+// exports.getCustomerByTestCase = function (test_case_id) {
+//     return new Promise(function(resolve, reject) {
+//         TestSuite.find({tests_case : {"$in" : [test_case_id]}}, function(err, testsSuites) {
+//             if(err) 
+//                 reject(err);
+//             else if(testsSuite != null) {
+//                 Project.find({test_suite_id : {"$in" : [testsSuite._id]}}, function(err, project) {
+//                     if(err)
+//                         reject(err);
+//                     else if (project != null) {
+//                         Customer.find(project.customer_id, function(err, customer){
+//                         	if(err)
+//                         		reject(err);
+//                         	resolve(customer)
+//                         });
+//                     }
+//                 });
+//             } 
+//         });
+
+//     });
+// };

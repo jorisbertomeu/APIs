@@ -87,3 +87,7 @@ exports.publicAccess = function(tab, res) {
     }    
     return false;
 }
+
+exports.isNotEmpty = function(string) {
+    return string != null && string !== undefined && string != "";
+}

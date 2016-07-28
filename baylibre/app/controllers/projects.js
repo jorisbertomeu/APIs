@@ -30,6 +30,7 @@ exports._postL1 = function(req, res) {
 	    project.customer_id 		= req.body.customer_id;
 	    project.board_instance_id 	= req.body.board_instance_id;
 	    project.name 				= req.body.name;
+	    project.test_suite_id		= req.body.test_suite_id;
 	    project.created_on 			= Date.now() / 1000 | 0;
 
 	    // Save object
@@ -73,7 +74,6 @@ exports._getL2 = function(req, res) {
 			res.send(err);
 		else if (project != null) {
 			// Get custmer by Id
-			console.log('customer id :' + project.customer_id);
 			Customer.findById(project.customer_id, function(err, customer){
 				if(err)
 					res.send(err);
@@ -86,8 +86,16 @@ exports._getL2 = function(req, res) {
 							Utils.sendUnauthorized(req, res);
 							return;
 						}
+					if(Utils.isNotEmpty(project.customer_id)) {
+						
+						Customer.findById(project.customer_id, function(err, customer) {
+							if(err)
+								res.send(err);
+							project.customer_id = customer.toObject();
+						});
+					}
 						// Get result
-						res.json(project.toObject());
+						res.json(project);
 					});
 				} else 
 					res.json({message : "No coustomer found for this project!"})
@@ -124,9 +132,23 @@ exports._putL2 = function(req, res) {
 									Utils.sendUnauthorized(req, res);
 									return;
 								}
+
 								// Mapping params
-								project.name = req.body.name;
-								project.description = req.body.description;
+								if(Utils.isNotEmpty(req.body.name)) {
+									project.name = req.body.name;
+								}
+								if(Utils.isNotEmpty(req.body.description)) {
+									project.description = req.body.description;
+								}
+								if(Utils.isNotEmpty(req.body.customer_id)) {
+									project.customer_id = req.body.customer_id;
+								}
+								if(Utils.isNotEmpty(req.body.board_instance_id)) {
+									project.board_instance_id = req.body.board_instance_id;
+								}
+								if(Utils.isNotEmpty(req.body.test_suite_id)) {
+									req.body.test_suite_id = req.body.test_suite_id;
+								}
 
 								// Update project
 								project.save(function(err) {
