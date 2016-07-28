@@ -43,7 +43,7 @@ exports.getUsersByCustomer = function(customer_id) {
 
 exports.sendUnauthorized = function(req, res) {
     res.status(403);
-    res.send({'error': 'Your user is not allowed to access to this resource'});
+    res.send({message: Constants._MSG_UNAUTHORIZED_, details: "Token mismatch with authorized token", code: Constants._CODE_UNAUTHORIZED_});
 };
 
 exports.replaceAll = function(str, find, replace) {
@@ -115,4 +115,8 @@ exports.getMailTransporter = function() {
 	    debug:true
 	})
     );
+};
+
+exports.sendError = function(red, err) {
+    return res.send({message: Constants._MSG_UNKNOWN_, details: err, code: Constants._CODE_UNKNOWN_});
 };
