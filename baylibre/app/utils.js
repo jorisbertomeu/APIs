@@ -4,6 +4,9 @@ var fs = require('fs');
 var Customer = require('./models/customer');
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
+var Constants = require('./constants');
+
+exports.Constants = Constants;
 
 exports.checkToken = function(req, res, mustBeAdmin, userId) {
     return new Promise(function(resolve, reject) {

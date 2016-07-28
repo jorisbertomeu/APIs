@@ -7,6 +7,7 @@ var Utils = require('../utils');
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 
+
 exports._postL1 = function(req, res) {
     var user = new User();
     var shasum = crypto.createHash('sha1');
@@ -50,7 +51,7 @@ exports._postL1 = function(req, res) {
 		    html: Utils.parseWelcomeMail(mail_html, user, req)
 		};
 	    }
-	    res.json({message: user});
+	    res.json({message: Utils.Constants._MSG_CREATED_, details: user, code: Utils.Constants._CODE_CREATED_});
 	    Utils.getMailTransporter().sendMail(mailOptions, function(error, info) {
 		if (error){
 		    return console.log(error);

@@ -3,23 +3,26 @@ var Board_instance = require('../models/board_instance');
 var Promise = require('bluebird');
 var Lab = require('../models/lab');
 var Board = require('../models/board');
+var Utils = require('../utils');
 
 exports._postL1 = function(req, res) {
     var customer = new Customer();
 	
-    customer.name = req.body.name;
-    customer.company = req.body.company;
-    customer.address = req.body.address;
-    customer.telephone = req.body.telephone;
-    customer.board_instances = req.body.board_instances;
-    customer.users_id = req.body.users_id;
+    Utils.checkToken(req, res, true).then(function(result) {
+	customer.name = req.body.name;
+	customer.company = req.body.company;
+	customer.address = req.body.address;
+	customer.telephone = req.body.telephone;
+	customer.board_instances = req.body.board_instances;
+	customer.users_id = req.body.users_id;
     
-    customer.save(function(err) {
-	if (err)
-	    res.send(err);
+	customer.save(function(err) {
+	    if (err)
+		res.send(err);
 
-	res.json({ message: 'Customer created!' });
-    });	
+	    res.json({message: Utils.Constants._MSG_CREATED_, details: customer, code: Utils.Constants._CODE_CREATED_});
+	});
+    });
 };
 
 exports._getL1 = function(req, res) {
