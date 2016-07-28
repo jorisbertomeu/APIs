@@ -15,13 +15,13 @@ exports.checkToken = function(req, res, mustBeAdmin, userId) {
 		return reject(err);
 	    if (!user || user === null)
 		return resolve(false);
-        if(userId instanceof Array) {
-            if(userId !== undefined && (userId.indexOf(User) != -1)) 
-                return resolve(true);
-        } else {
-    	    if (userId !== undefined && userId.toString() != user._id.toString())
-    		return resolve(false);
-        }
+            if (userId instanceof Array) {
+		if (userId !== undefined && (userId.indexOf(User) != -1)) 
+                    return resolve(true);
+            } else {
+    		if (!user.isAdmin && userId !== undefined && userId.toString() != user._id.toString())
+    		    return resolve(false);
+            }
 	    if (mustBeAdmin && user.isAdmin)
 		return resolve(true);
 	    else if (mustBeAdmin && !user.isAdmin)

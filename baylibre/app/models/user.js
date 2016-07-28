@@ -8,7 +8,8 @@ var UserSchema   = new Schema({
     created_on: Number,
     isAdmin: Boolean,
     customers_id: [ObjectId],
-    user_tokens: [String]
+    user_tokens: [String],
+    name: String
 });
 
 module.exports = mongoose.model('User', UserSchema);

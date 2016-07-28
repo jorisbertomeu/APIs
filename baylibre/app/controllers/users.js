@@ -11,16 +11,15 @@ var smtpTransport = require('nodemailer-smtp-transport');
 exports._postL1 = function(req, res) {
     var user = new User();
     var shasum = crypto.createHash('sha1');
-    var missing;
 
     Utils.checkToken(req, res, true).then(function(result) {
 	if (!result) {
 	    Utils.sendUnauthorized(req, res);
 	    return;
 	}
-	missing = Utils.checkFields(req.body, ["username", "password", "isAdmin", "customers_id", "email", "sendWelcomeMail"]);
+	var missing = Utils.checkFields(req.body, ["username", "password", "isAdmin", "customers_id", "email", "sendWelcomeMail"]);
 	if (missing.length != 0)
-	    return res.send({message: Utils.Constants._MSG_FAILED_, details: "Missing followwing properties : " + missing, code: Utils.Constants._CODE_FAILED_});
+	    return res.send({message: Utils.Constants._MSG_ARGS_, details: "Missing followwing properties : " + missing, code: Utils.Constants._CODE_ARGS_});
 	user.username = req.body.username;
 	shasum.update(req.body.password);
 	user.password = shasum.digest('hex');
@@ -72,8 +71,9 @@ function randomString(len, charSet) {
 }
 
 exports._postL1_logout = function(req, res) {
-    if (!req.body.hasOwnProperty('username'))
-	return res.send({message: Utils.Constants._MSG_ARGS_, details: 'You must provide a \'username\' property into JSON body request to logout an user', code: Utils.Constants._CODE_ARGS_});
+    var missing = Utils.checkFields(req.body, ["username"]);
+    if (missing.length != 0)
+	return res.send({message: Utils.Constants._MSG_ARGS_, details: "Missing followwing properties : " + missing, code: Utils.Constants._CODE_ARGS_});
     User.findOne({"username": req.body.username}, function(err, user) {
 	if (err)
 	    return Utils.sendError(res, err);
@@ -155,7 +155,7 @@ exports._getL3_forgot = function(req, res) {
 	    forgot.save(function(err, forgot) {
 		if (err)
 		    return Utils.sendError(res, err);
-		res.json(message: Utils.Constants._MSG_OK_, details: user, code: Utils.Constants._CODE_OK_);
+		res.json({message: Utils.Constants._MSG_OK_, details: user, code: Utils.Constants._CODE_OK_});
 	    });
 	});
     });
@@ -164,6 +164,9 @@ exports._getL3_forgot = function(req, res) {
 exports._postL1_login = function(req, res) {
     var shasum = crypto.createHash('sha1');
     
+    var missing = Utils.checkFields(req.body, ["username", "password"]);
+    if (missing.length != 0)
+	return res.send({message: Utils.Constants._MSG_ARGS_, details: "Missing followwing properties : " + missing, code: Utils.Constants._CODE_ARGS_});
     User.findOne({"username": req.body.username}, function(err, user) {
 	if (err)
 	    return res.send({message: Utils.Constants._MSG_UNKNOWN_, details: err, code: _CODE_UNKNOWN_});
@@ -189,7 +192,7 @@ exports._getL1 = function(req, res) {
 	User.find({}, function(err, users) {
 	    if (err)
 		return Utils.sendError(res, err);
-	    res.json({message: Utils.Constants._MSG_OK_, details, users, code: Utils.Constants._CODE_OK_});
+	    res.json({message: Utils.Constants._MSG_OK_, details: users, code: Utils.Constants._CODE_OK_});
 	});
     });
 };
@@ -208,18 +211,42 @@ exports._getL2 = function(req, res) {
 };
 
 exports._putL2 = function(req, res) {
-    Utils.checkToken(req, res, false, req.params.user_id).then(function(result) {
+    var shasum = crypto.createHash('sha1');
+    Utils.checkToken(req, res, true, req.params.user_id).then(function(result) {
 	if (!result)
 	    return Utils.sendUnauthorized(req, res);
 	User.findById(req.params.user_id, function(err, user) { 
 	    if (err)
 		return Utils.sendError(res, err);
-	    user.name = req.body.name;
-	    user.save(function(err) {
-		if (err)
-		    Utils.SendError(res, err);
-		res.json({message: Utils.Constants._MSG_MODIFIED_, details: user, code: Utils.Constants._CODE_MODIFIED_});
-	    });	    
+
+	    if (req.body.hasOwnProperty('name'))
+		user.name = req.body.name;
+	    if (req.body.hasOwnProperty('email'))
+		user.email = req.body.email;
+	    if (req.body.hasOwnProperty('password')) {
+		shasum.update(req.body.password);
+		user.password = shasum.digest('hex');
+	    }
+	    
+	    if (req.body.hasOwnProperty('customers_id') || req.body.hasOwnProperty('isAdmin')) {
+		Utils.checkToken(req, res, true).then(function(result) {
+		    if (req.body.hasOwnProperty('customers_id'))
+			user.customers_id = req.body.customers_id;
+		    if (req.body.hasOwnProperty('isAdmin'))
+			user.isAdmin = req.body.isAdmin;
+		    user.save(function(err) {
+			if (err)
+			    return Utils.SendError(res, err);
+			res.json({message: Utils.Constants._MSG_MODIFIED_, details: user, code: Utils.Constants._CODE_MODIFIED_});
+		    });
+		});
+	    } else {
+		user.save(function(err) {
+		    if (err)
+			return Utils.SendError(res, err);
+		    res.json({message: Utils.Constants._MSG_MODIFIED_, details: user, code: Utils.Constants._CODE_MODIFIED_});
+		});
+	    }
 	});
     });
 };

@@ -25,10 +25,12 @@ module.exports = function(app, express) {
 		if (!user) {
 		    return res.send({'error': 'No user found for this token'});
 		}
+		next();
 	    });
-	} else
+	} else {
 	    console.log('=> Endpoint ' + req.originalUrl + ' doesn\'t need token authentication');
-	next();
+	    next();
+	}
     });
 
     router.get('/', function(req, res) {
