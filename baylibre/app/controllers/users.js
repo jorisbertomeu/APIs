@@ -17,7 +17,7 @@ exports._postL1 = function(req, res) {
 	    Utils.sendUnauthorized(req, res);
 	    return;
 	}
-	missing = Utils.checkFields(req.body, ["username", "password", "isAdmin", "customers_id", "email"]);
+	missing = Utils.checkFields(req.body, ["username", "password", "isAdmin", "customers_id", "email", "sendWelcomeMail"]);
 	if (missing.length != 0)
 	    return res.send({'error': "Missing followwing properties : " + missing});
 	user.username = req.body.username;
@@ -27,11 +27,36 @@ exports._postL1 = function(req, res) {
 	user.isAdmin = req.body.isAdmin;
 	user.customers_id = req.body.customers_id;
 	user.email = req.body.email;
+
+	if (req.body.sendWelcomeMail) {
+	    try {
+		var mail_text = Utils.loadFile(global.config.mail.welcomeMail.templates.text);
+		var mail_html = Utils.loadFile(global.config.mail.welcomeMail.templates.html);
+	    } catch (err) {
+		console.log(err);
+		return res.send({'error': 'Error while fetching mail template, action canceled', 'details': err});
+	    }
+	}
     
 	user.save(function(err) {
 	    if (err)
 		res.send(err);
-	    res.json({ message: 'User created!' });
+	    if (req.body.sendWelcomeMail) {
+		var mailOptions = {
+		    from: '"'+global.config.mail.welcomeMail.settings.fromName+'"<'+global.config.mail.welcomeMail.settings.fromAddress+'>',
+		    to: user.email,
+		    subject: global.config.mail.welcomeMail.settings.subject,
+		    text: Utils.parseWelcomeMail(mail_text, user, req),
+		    html: Utils.parseWelcomeMail(mail_html, user, req)
+		};
+	    }
+	    res.json({message: user});
+	    Utils.getMailTransporter().sendMail(mailOptions, function(error, info) {
+		if (error){
+		    return console.log(error);
+		}
+		console.log('Message sent: ' + info.response);
+	    });
 	});	
     });
 };
@@ -82,19 +107,6 @@ exports._postL1_forgot = function(req, res) {
 	    res.send({'error': 'User not found by his ' + toSearch + ' : ' + ((req.body.hasOwnProperty('email')) ? req.body.email : req.body.username)});
 	    return;
 	}
-	var transporter = nodemailer.createTransport(
-	    smtpTransport({
-		host: global.config.mail.smtp.server,
-		secure: false,
-		port: global.config.mail.smtp.port,
-		auth: {
-		    user: global.config.mail.smtp.user,
-		    pass: global.config.mail.smtp.password
-		},
-		tls: {rejectUnauthorized: false},
-		debug:true
-	    })
-	);
 
 	var forgotHash = randomString(32);
 	var forgot = new Forgot();
@@ -111,7 +123,7 @@ exports._postL1_forgot = function(req, res) {
 	    var mail_html = Utils.loadFile(global.config.mail.forgotMail.templates.html);
 	} catch (err) {
 	    console.log(err);
-	    return res.send({'error': 'Error while fetching mail template', 'details': err});
+	    return res.send({'error': 'Error while fetching mail template, action canceled', 'details': err});
 	}
 	forgot.save(function(err) {
 	    if (err)
@@ -120,11 +132,11 @@ exports._postL1_forgot = function(req, res) {
 		from: '"'+global.config.mail.forgotMail.settings.fromName+'"<'+global.config.mail.forgotMail.settings.fromAddress+'>',
 		to: user.email,
 		subject: global.config.mail.forgotMail.settings.subject,
-		text: Utils.parseMail(mail_text, user, forgot, req, forgotHash),
-		html: Utils.parseMail(mail_html, user, forgot, req, forgotHash)
+		text: Utils.parseForgotMail(mail_text, user, forgot, req, forgotHash),
+		html: Utils.parseForgotMail(mail_html, user, forgot, req, forgotHash)
 	    };
 	    res.json({"message": "Reset password link for "+user.username+" will be sent to "+user.email});
-	    transporter.sendMail(mailOptions, function(error, info) {
+	    Utils.getMailTransporter.sendMail(mailOptions, function(error, info) {
 		if (error){
 		    return console.log(error);
 		}
@@ -204,11 +216,35 @@ exports._getL2 = function(req, res) {
 	    Utils.sendUnauthorized(req, res);
 	    return;
 	}
+
 	User.findById(req.params.user_id, function(err, user) {
 	    if (err)
-		res.send(err);
-	    res.json(user);
-	});
+			res.send(err);
+
+		// Result
+		var result = user.toObject();
+
+	// Get User with fetching objects
+	if (req.query.full == "true") {
+		Promise.all([function(user) {
+			return new Promise(function(resolve, reject){
+				Customer.findById(user.customers_id, function(err, customers){
+					if(err) 
+						reject(err);
+					resolve(result);
+				});
+			});
+		}]).then(function(customers){
+			result.customers_id = customers.toObject();
+			//Send result
+			res.json(result);
+		});
+
+	} else 
+			// Get user without fetching objects
+			// Send result
+		    res.json(result);
+		});
     });
 };
 

@@ -1,6 +1,10 @@
 // Mapped Objects
 var Project = require('../models/project');
-var Customer = require('../models/customer')
+var Customer = require('../models/customer');
+var BoardInstance = require('../models/board_instance');
+var TestSuite = require('../models/test_suite');
+var Lab = require('../models/lab');
+var Board = require('../models/board');
 
 // Modules
 var Promise = require('bluebird');
@@ -71,35 +75,97 @@ exports._getL2 = function(req, res) {
 	// Get project by Id
 	Project.findById(req.params.project_id, function(err, project){
 		if(err)
+			// Send error
 			res.send(err);
-		else if (project != null) {
-			// Get custmer by Id
-			Customer.findById(project.customer_id, function(err, customer){
-				if(err)
-					res.send(err);
+		if (project != null) {
+			// Result object
+			var result = project.toObject();
 
-				// check if customer is not null
-				else if(customer != null) {
-					// Check user token
-					Utils.checkToken(req, res, false, customer.users_id).then (function(result) {
-						if(!result) {
+			// Fetch all objects
+			if (req.query.full == "true") {
+
+				// Promise to get board instance
+				var boardInstancePromis = new Promise(function(resolve, reject) {
+
+				// Get board instance by project board instance id
+				BoardInstance.findById(project.board_instance_id, function(err, board_instance) {
+					if(err)
+						reject(err);
+
+					// Get Lab by board instance lab id
+					Lab.findById(board_instance.lab_id, function(err, lab) {
+					var labInstance = board_instance.toObject();
+					// Set lab object in board instance object
+					labInstance.lab_id = lab;
+
+					// Get Board by Boared instace board id
+					Board.findById(board_instance.board_id, function(err, board) {
+						labInstance.board_id = board;
+								// Send result
+							    resolve(labInstance);
+							});
+						    });
+						});
+				});
+
+			// Promise to get customer
+			var customerPromis = 
+				new Promise(function(resolve, reject) {
+
+					// Find customer by project customer id
+					Customer.findById(project.customer_id, function(err, customer){
+						if(err)
+							reject(err);
+						// Send result
+						resolve(customer.toObject());
+					});
+				});
+
+			// Execution promises
+			Promise.all([customerPromis]).then(function(customerObject) {
+					// Check user token authorization
+					Utils.checkToken(req, res, false, Utils.getUsersByCustomer(project.customer_id)).then (function(result) {
+							if(!result) {
+								Utils.sendUnauthorized(req, res);
+							}
+					});
+
+					// Set customer object in result
+					result.customer_id = customerObject;
+
+					Promise.all([boardInstancePromis]).then(function(boardInstanceObj){
+						result.board_instance_id = boardInstanceObj;
+						// Send result
+						res.json(result);
+					}).error(function(err) {
+					  console.log(err.message); 
+					});;
+			}).error(function(err) {
+				  console.log(err.message);
+				});
+
+			// Get project object without fetching objects
+			} else {
+
+				// Find customer by project customer id
+				Customer.findById(project.customer_id, function(err, customer){
+					if(err)
+						// Send error
+						reject(err);
+					if(customer != null) {
+						// Check user authorization
+						Utils.checkToken(req, res, false, Utils.getUsersByCustomer(project.customer_id)).then (function(token) {
+						if(!token) {
 							Utils.sendUnauthorized(req, res);
 							return;
 						}
-					if(Utils.isNotEmpty(project.customer_id)) {
-						
-						Customer.findById(project.customer_id, function(err, customer) {
-							if(err)
-								res.send(err);
-							project.customer_id = customer.toObject();
-						});
-					}
-						// Get result
-						res.json(project);
-					});
-				} else 
-					res.json({message : "No coustomer found for this project!"})
-			});
+						// Send result
+						res.json(result);
+				});
+
+			}
+		});
+			}
 		} else 
 			// No project found for this Id
 			res.json({message : 'Project not found!'});
