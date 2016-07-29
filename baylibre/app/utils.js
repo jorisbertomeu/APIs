@@ -4,6 +4,9 @@ var fs = require('fs');
 var Customer = require('./models/customer');
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
+var Constants = require('./constants');
+
+exports.Constants = Constants;
 
 exports.checkToken = function(req, res, mustBeAdmin, userId) {
     return new Promise(function(resolve, reject) {
@@ -21,6 +24,7 @@ exports.checkToken = function(req, res, mustBeAdmin, userId) {
     	    if (userId !== undefined && userId.toString() != user._id.toString())
     		return resolve(false);
         }
+
 	    if (mustBeAdmin && user.isAdmin)
 		    return resolve(true);
         
@@ -44,7 +48,7 @@ exports.getUsersByCustomer = function(customer_id) {
 
 exports.sendUnauthorized = function(req, res) {
     res.status(403);
-    res.send({'error': 'Your user is not allowed to access to this resource'});
+    res.send({message: Constants._MSG_UNAUTHORIZED_, details: "Token mismatch with authorized token", code: Constants._CODE_UNAUTHORIZED_});
 };
 
 exports.replaceAll = function(str, find, replace) {
@@ -123,3 +127,7 @@ exports.getMailTransporter = function() {
     );
 };
 
+
+exports.sendError = function(red, err) {
+    return res.send({message: Constants._MSG_UNKNOWN_, details: err, code: Constants._CODE_UNKNOWN_});
+};
