@@ -19,12 +19,12 @@ module.exports = function(app, express) {
 	if (!Utils.publicAccess(allowedRes, req.originalUrl)) {
 	    console.log('=> Endpoint ' + req.originalUrl + ' needs token authentication');
 	    if (!req.headers.hasOwnProperty('authorization'))
-	 	return res.send({'error': 'No token API provided'});
+	 	return res.send({message: Utils.Constants._MSG_TOKEN_, details: "You must provide a token API", code: Utils.Constants._CODE_TOKEN_});
 	    User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
 		if (err)
-		    return res.send(err);
+		    return Utils.sendError(res, err);
 		if (!user) {
-		    return res.send({'error': 'No user found for this token'});
+		    return res.send({message: Utils.Constants._MSG_TOKEN_, details: "Token API unknown", code: Utils.Constants._CODE_TOKEN_});
 		}
 		next();
 	    });
@@ -35,7 +35,7 @@ module.exports = function(app, express) {
     });
 
     router.get('/', function(req, res) {
-	res.json({ message: 'Hooray! Welcome to our private API! Made with <3 by Joris Bertomeu <joris.bertomeu@epitech.eu>' });	
+	res.json({message: Utils.Constants._MSG_WELCOME_, details: global.config.global.welcomeMessage, code: Utils.Constants._CODE_WELCOME_});	
     });
 
     /* BOARDS RES */
@@ -91,33 +91,32 @@ module.exports = function(app, express) {
 	.delete(UsersController._deleteL2)
 	.put(UsersController._putL2);
 
-	/* PROJECT RES */
-	router.route('/projects')
+    /* PROJECT RES */
+    router.route('/projects')
 	.post(ProjectController._postL1)
 	.get(ProjectController._getL1);
-	router.route('/projects/:project_id')
+    router.route('/projects/:project_id')
 	.get(ProjectController._getL2)
 	.put(ProjectController._putL2)
 	.delete(ProjectController._deleteL2);
 
-	/* Test case*/
-	router.route('/test_case')
+    /* Test case*/
+    router.route('/test_case')
 	.post(TestCaseController._postL1)
 	.get(TestCaseController._getL1);
-	router.route('/test_case/:test_case_id')
+    router.route('/test_case/:test_case_id')
 	.put(TestCaseController._putL2)
 	.get(TestCaseController._getL2)
 	.delete(TestCaseController._deleteL2);
 
 	/* Test case*/
-	router.route('/test_suite')
+    router.route('/test_suite')
 	.post(TestSuiteController._postL1)
 	.get(TestSuiteController._getL1);
-	router.route('/test_suite/:test_suite_id')
+    router.route('/test_suite/:test_suite_id')
 	.put(TestSuiteController._putL2)
 	.get(TestSuiteController._getL2)
 	.delete(TestSuiteController._deleteL2);
-
     
     app.use('/', router);
 };
