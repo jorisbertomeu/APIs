@@ -10,6 +10,7 @@ define("_CODE_OK_", 0);
 define("_CODE_CREATED_", 1);
 define("_CODE_DELETED_", 2);
 define("_CODE_MODIFIED_", 3);
+define("_CODE_WELCOME_", 4);
 define("_CODE_FAILED_", -1);
 define("_CODE_ARGS_", -2);
 define("_CODE_TOKEN_", -3);
@@ -23,8 +24,10 @@ define("_MSG_MODIFIED_", "Successfully modified");
 define("_MSG_FAILED_", "Error occurred, check your request or contact administrator");
 define("_MSG_UNKNOWN_", "An unknown error occured, contact administrator");
 define("_MSG_ARGS_", "Bad JSON body or Argument(s) provided");
-define("_MSG_TOKEN_", "Error relevant to user token");
+define("_MSG_TOKEN_", "Error relevant to token API ('Authorization' header)");
 define("_MSG_UNAUTHORIZED_", "Your user is not allowed to access to this resource");
 
 /* Definition of global variables */
 define("_TRUE_", "true");
+define("_MSG_WELCOME_", "Welcome message");
+

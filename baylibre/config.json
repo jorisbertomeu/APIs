@@ -1,4 +1,7 @@
 {
+    "global": {
+	"welcomeMessage": "Hooray! Welcome to our private API! Made with <3 by Joris Bertomeu <joris.bertomeu@epitech.eu>"
+    },
     "lava": {
 	"api": {
 	    "username": "powerci",

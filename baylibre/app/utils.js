@@ -129,6 +129,6 @@ exports.getMailTransporter = function() {
 };
 
 
-exports.sendError = function(red, err) {
+exports.sendError = function(res, err) {
     return res.send({message: Constants._MSG_UNKNOWN_, details: err, code: Constants._CODE_UNKNOWN_});
 };
