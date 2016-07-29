@@ -25,3 +25,6 @@ define("_MSG_UNKNOWN_", "An unknown error occured, contact administrator");
 define("_MSG_ARGS_", "Bad JSON body or Argument(s) provided");
 define("_MSG_TOKEN_", "Error relevant to user token");
 define("_MSG_UNAUTHORIZED_", "Your user is not allowed to access to this resource");
+
+/* Definition of global variables */
+define("_TRUE_", "true");

@@ -5,6 +5,7 @@ var BoardInstance = require('../models/board_instance');
 var TestSuite = require('../models/test_suite');
 var Lab = require('../models/lab');
 var Board = require('../models/board');
+var Constants = require('../constants');
 
 // Modules
 var Promise = require('bluebird');
@@ -82,7 +83,7 @@ exports._getL2 = function(req, res) {
 			var result = project.toObject();
 
 			// Fetch all objects
-			if (req.query.full == "true") {
+			if (req.query.full == Constants._TRUE_) {
 
 				// Promise to get board instance
 				var boardInstancePromis = new Promise(function(resolve, reject) {

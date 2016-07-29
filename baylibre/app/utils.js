@@ -10,6 +10,7 @@ exports.Constants = Constants;
 
 exports.checkToken = function(req, res, mustBeAdmin, userId) {
     return new Promise(function(resolve, reject) {
+        //console.log("users id :" + userId);
 	User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
 	    if (err)
 		return reject(err);

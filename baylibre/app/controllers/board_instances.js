@@ -1,5 +1,12 @@
-var Board_instance = require('../models/board_instance');
-var Utils = require('../utils');
+var Board_instance 	= require('../models/board_instance');
+var Board 			= require('../models/board');
+var Customer 		= require('../models/customer');
+var Lab 			= require('../models/lab');
+
+var Constants 		= require('../constants');
+var Utils 			= require('../utils');
+
+var Promise = require('bluebird');
 
 exports._postL1 = function(req, res) {
     var board_instance = new Board_instance();
@@ -42,9 +49,55 @@ exports._getL1 = function(req, res) {
 
 exports._getL2 = function(req, res) {
     Board_instance.findById(req.params.board_id, function(err, board_instance) {
-	if (err)
-	    res.send(err);
-	res.json(board_instance);
+		if (err)
+		    res.send(err);
+		Utils.checkToken(req, res, false, Utils.getUsersByCustomer(board_instance.customer_id)).then(function(result) {
+			if (!result) {
+			    Utils.sendUnauthorized(req, res);
+			    return;
+			}
+
+			if(req.query.full == Constants._TRUE_) {
+				var result = board_instance.toObject();
+				// Promis to get doard
+				var boardPromise = new Promise(function(resolve, reject) {
+					Board.findById(board_instance.board_id, function(err, board){
+						if(err) 
+							reject(err);
+						result.board_id = board.toObject();
+						resolve(result);
+					})
+				});
+
+				// Promis to get customer
+				var customerPromis = new Promise(function (resolve, reject) {
+					Customer.findById(board_instance.customer_id, function(err, customer){
+						if(err)
+							reject(err);
+						result.customer_id = customer;
+						resolve(result);
+					})
+				});
+
+				// Promis to get Lab
+				var labPromis = new Promise(function(resolve, reject) {
+					Lab.findById(board_instance.lab_id, function(err, lab){
+						if(err)
+							reject(err);
+
+						result.lab_id = lab;
+						resolve(result);
+					});
+				});
+
+				Promise.any([labPromis, boardPromise, customerPromis]).then(function(result) {
+					res.json(result);
+				});
+
+			// Get object without fetching
+			} else 
+			res.json(board_instance);
+		});
     });
 };
 
