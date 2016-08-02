@@ -1,3 +1,4 @@
+// Controllers
 var BoardsController = require('../controllers/boards');
 var LabsController = require('../controllers/labs');
 var Board_instancesController = require('../controllers/board_instances');
@@ -6,7 +7,12 @@ var UsersController = require('../controllers/users');
 var ProjectController = require('../controllers/projects');
 var TestCaseController = require('../controllers/test_case');
 var TestSuiteController = require('../controllers/test_suite');
+var SocsController = require('../controllers/socs');
+
+// Models
 var User = require('../models/user');
+
+// Utils
 var Utils = require('../utils');
 
 module.exports = function(app, express) {
@@ -117,6 +123,16 @@ module.exports = function(app, express) {
 	.put(TestSuiteController._putL2)
 	.get(TestSuiteController._getL2)
 	.delete(TestSuiteController._deleteL2);
+
+	/* Socs routes */
+	router.route('/soc')
+	.post(SocsController._postL1)
+	.get(SocsController._getL1);
+	router.route('/soc/:soc_id')
+	.put(SocsController._putL2)
+	.get(SocsController._getL2)
+	.delete(SocsController._deleteL2);
+
     
     app.use('/', router);
 };

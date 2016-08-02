@@ -1,11 +1,13 @@
 // Mapped Objects
-var TestSuite = require('../models/test_suite');
+var TestSuite 	= require('../models/test_suite');
+var TestCase 	= require('../models/test_case');
 
 // Modules
-var Promise = require('bluebird');
+var Promise 	= require('bluebird');
 
 // Utils
-var Utils = require('../utils');
+var Utils 		= require('../utils');
+var Constants	= require('../constants');
 
 // Create test suite
 exports._postL1 = function(req, res) {
@@ -64,7 +66,6 @@ exports._getL1= function(req, res) {
 
 // Get test suite by Id
 exports._getL2 = function(req, res) {
-
 	// Check user token
 	Utils.checkToken(req, res, true).then (function(result) {
 		if(!result) {
@@ -75,9 +76,35 @@ exports._getL2 = function(req, res) {
 		TestSuite.findById(req.params.test_suite_id, function(err, testSuite){
 			if(err)
 				res.send(err);
+			var result = null;
 
-			// Get result
-			res.json(testSuite);
+			if(testSuite != null) {
+				result = testSuite.toObject();
+
+				if(req.query.full == Constants._TRUE_) {
+
+					var testCasesPromis = new Promise(function(resolve, reject) {
+						TestCase.find({_id : {"$in" : [result.tests_case]}}, function(err, testsCase) {
+							if(err) 
+								reject(err);
+							result.tests_case = testsCase.toObject();
+							resolve(result);
+						});
+					});
+
+					Promise.all([testCasesPromis]).then(function(result){
+						// Get result
+						res.json({message: Constants._CODE_OK_, details: result, code: Constants._CODE_OK_});
+						return;
+					});
+
+				} else 
+					// Get result
+					res.json({message: Utils.Constants._CODE_OK_, details: result, code: Utils.Constants._CODE_OK_});
+
+			} else
+				// Get result
+				res.json({message: Utils.Constants._CODE_OK_, details: result, code: Utils.Constants._CODE_OK_});
 		});
 	});
 };

@@ -5,6 +5,7 @@ var morgan = require('morgan');
 var routes = require('./app/routes/index');
 var Promise = require('bluebird');
 var fs = require('fs');
+var multer  =   require('multer');
 var data = fs.readFileSync('./config.json');
 
 

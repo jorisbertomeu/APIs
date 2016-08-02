@@ -1,12 +1,21 @@
+// Import entities
 var User = require('../models/user');
 var Forgot = require('../models/forgot');
 var Customer = require('../models/customer');
+
+// Import Modules
 var Promise = require('bluebird');
 var crypto = require('crypto');
-var Utils = require('../utils');
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
+var multer = require('multer');
+
+
+var Utils = require('../utils');
 var Constants = require('../constants');
+
+// Global vars
+var upload = multer({dest: 'public/uploads/users_avatars'});
 
 
 exports._postL1 = function(req, res) {
@@ -44,13 +53,19 @@ exports._postL1 = function(req, res) {
 				return Utils.sendError(res, err);
 			if (req.body.sendWelcomeMail) {
 				var mailOptions = {
-					from: '"'+global.config.mail.welcomeMail.settings.fromName+'"<'+global.config.mail.welcomeMail.settings.fromAddress+'>',
+					from: '"' + global.config.mail.welcomeMail.settings.fromName+'"<'+global.config.mail.welcomeMail.settings.fromAddress+'>',
 					to: user.email,
 					subject: global.config.mail.welcomeMail.settings.subject,
 					text: Utils.parseWelcomeMail(mail_text, user, req),
 					html: Utils.parseWelcomeMail(mail_html, user, req)
 				};
 			}
+			if(req.files.avatar != null) {
+				upload.any(function (req, res, next){
+					res.append(req.files);
+				});
+			}
+			
 			res.json({message: Utils.Constants._MSG_CREATED_, details: user, code: Utils.Constants._CODE_CREATED_});
 			Utils.getMailTransporter().sendMail(mailOptions, function(error, info) {
 				if (error)

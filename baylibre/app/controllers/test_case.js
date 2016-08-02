@@ -139,7 +139,7 @@ exports._putL2 = function(req, res) {
 	});
 };
 
-// Update test case
+// Delete test case
 exports._deleteL2 = function(req, res) {
 
 	// Check user token

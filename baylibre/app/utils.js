@@ -49,7 +49,7 @@ exports.getUsersByCustomer = function(customer_id) {
 
 exports.sendUnauthorized = function(req, res) {
     res.status(403);
-    res.send({message: Constants._MSG_UNAUTHORIZED_, details: "Token mismatch with authorized token", code: Constants._CODE_UNAUTHORIZED_});
+    res.send({message: Constants._MSG_UNAUTHORIZED_, details: "Token mismatch with authorized token", code: Constants._CODE_ERROR_});
 };
 
 exports.replaceAll = function(str, find, replace) {
@@ -131,4 +131,11 @@ exports.getMailTransporter = function() {
 
 exports.sendError = function(res, err) {
     return res.send({message: Constants._MSG_UNKNOWN_, details: err, code: Constants._CODE_UNKNOWN_});
+};
+
+
+// Error when missing params
+exports.sendMisiingParams = function(res, mapas) {
+    res.status(403);
+    res.send({message: Constants._MSG_MISSING_PARAMS_, details: "Missing fallowing params : " + mapas, code: Constants._CODE_ARGS_});
 };
