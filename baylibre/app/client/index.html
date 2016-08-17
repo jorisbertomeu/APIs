@@ -1,0 +1,61 @@
+<html >
+	<head>
+		<title>AngularJS</title>
+	</head>
+
+	<script src="js/angular.min.js" ></script>
+	<script src="js/angular-route.min.js"></script>
+    <script src="js/app.js"></script>
+	
+	<body ng-app="app">	
+
+		<div data-ng-controller="indexCtrl">
+			<h1>{{titre}}</h1>
+			<p> <a ng-href="#showUsers" >Show all users</a> | <a  ng-href="#addUser" >addUser</a> </p>
+
+			<script type="text/ng-template" id="showUsers.html" >
+				{{contenu}}
+
+				<div class="col-md-4" ng-repeat="user in users">
+					<div class="panel panel-primary">
+						<div class="panel-heading">{{user.name}}</div>
+						
+						<div class="panel-body">
+								FName: {{ user.first_name }}.<br>
+								LName: {{ user.last_name }}.<br>
+								Username: {{ user.username }}.<br>
+								Email: 	{{ user.email }}.<br>
+								Created on: {{ user.created_on }}.<br>
+								Is admin: {{ user.isAdmin }}.<br>
+								User tokens: 	{{ user.username }}.<br>
+								Avatar: {{ user.avatar }}.<br>
+								<a ng-href="#editUsers/"{{ user._id}}>Edit</a>
+								-----------------------------
+								<br>
+						</div>
+
+					</div>
+				</div>
+			</script>
+
+			<script type="text/ng-template" id="addUser.html" >
+    				{{contenu}}
+                    FirstName : <input type="text" ng-model="user.first_name"><br>
+                    LastName : <input type="text" ng-model="user.last_name"><br>
+                    UserName : <input type="text" ng-model="user.username"><br>
+                    Password : <input type="password" ng-model="user.password"><br>
+                    Email : <input type="text" ng-model="user.email"><br>
+                    Is Admin: <select ng-model="user.isAdmin">
+      					<option value="">---Please select---</option>
+            			<option value="true">Yes</option>
+      					<option value="false">No</option>
+    				</select><br>
+                    User avatar: <input type="file" ngf-select="" ng-model="user.avatar" name="file" ngf-accept="'image/*'" required=""></br>
+            		<input type="button" ng-click="saveUser(user)" value="Save" />
+			</script>
+
+		</div>
+
+		<div ng-view></div>
+	</body>
+</html>

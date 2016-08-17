@@ -1,0 +1,14 @@
+/* Table actions*/
+// groups actions
+db.actions.insert({title:"Show all groups", technical_name:"groups_get_groups"});
+db.actions.insert({title:"Show group info", technical_name:"groups_get_group"});
+db.actions.insert({title:"Update group info", technical_name:"groups_update_group"});
+db.actions.insert({title:"Remove group", technical_name:"groups_delete_group"});
+db.actions.insert({title:"Add users to group", technical_name:"groups_add_user_role"});
+db.actions.insert({title:"Remove users from group", technical_name:"groups_remove_user_role"});
+db.actions.insert({title:"Add bouard instance to group", technical_name:"groups_add_board_instance"});
+db.actions.insert({title:"Remove bouard instance from group", technical_name:"groups_remove_board_instance"});
+db.actions.insert({title:"Add user - board instance roles", technical_name:"groups_add_user_board_instance"});
+db.actions.insert({title:"create user", technical_name:"groups_remove_user_board_instance"});
+// users actions
+users_get_users

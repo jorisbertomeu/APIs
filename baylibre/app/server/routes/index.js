@@ -1,13 +1,16 @@
 // Controllers
-var BoardsController = require('../controllers/boards');
-var LabsController = require('../controllers/labs');
-var Board_instancesController = require('../controllers/board_instances');
-var CustomersController = require('../controllers/customers');
-var UsersController = require('../controllers/users');
-var ProjectController = require('../controllers/projects');
-var TestCaseController = require('../controllers/test_case');
-var TestSuiteController = require('../controllers/test_suite');
-var SocsController = require('../controllers/socs');
+var BoardsController 			= require('../controllers/boards');
+var LabsController 				= require('../controllers/labs');
+var Board_instancesController 	= require('../controllers/board_instances');
+var CustomersController 		= require('../controllers/customers');
+var UsersController 			= require('../controllers/users');
+var ProjectController 			= require('../controllers/projects');
+var TestCaseController 			= require('../controllers/test_case');
+var TestSuiteController 		= require('../controllers/test_suite');
+var SocsController 				= require('../controllers/socs');
+var GroupsController 			= require('../controllers/groups');
+var RolesController 			= require('../controllers/roles');
+var ActionsController 			= require('../controllers/actions');
 
 // Models
 var User = require('../models/user');
@@ -82,8 +85,8 @@ module.exports = function(app, express) {
 
     /* USERS RES */
     router.route('/users')
-	.post(UsersController._postL1)
-	.get(UsersController._getL1);
+	.post(UsersController._create_user)
+	.get(UsersController._get_users);
     router.route('/forgot')
 	.post(UsersController._postL1_forgot);
     router.route('/forgot/:forgot_id/:hash')
@@ -115,7 +118,7 @@ module.exports = function(app, express) {
 	.get(TestCaseController._getL2)
 	.delete(TestCaseController._deleteL2);
 
-	/* Test case*/
+	/* Test suite*/
     router.route('/test_suite')
 	.post(TestSuiteController._postL1)
 	.get(TestSuiteController._getL1);
@@ -132,6 +135,43 @@ module.exports = function(app, express) {
 	.put(SocsController._putL2)
 	.get(SocsController._getL2)
 	.delete(SocsController._deleteL2);
+
+	/* Group routes */
+	router.route('/group')
+	.post(GroupsController._create_group)
+	.get(GroupsController._get_groups);
+	router.route('/group/:group_id')
+	.put(GroupsController._update_group)
+	.get(GroupsController._get_group)
+	.delete(GroupsController._delete_group);
+	router.route('/group/user_role')
+	.post(GroupsController._add_user_role)
+	.delete(GroupsController._remove_user_role);
+	router.route('/group/board_instance')
+	.post(GroupsController._add_board_instance);
+	//.get(GroupsController._getListBoardInstances);
+	router.route('/group/board_instance/:board_instance_id')
+	.delete(GroupsController._remove_board_instance);
+	router.route('/group/add_user_in_board_instance')
+	.post(GroupsController._add_user_board_instance),
+	.delete(GroupsController._remove_user_board_instance);
+
+
+	/* Role routes */
+	router.route('/role')
+	.post(RolesController._create_role)
+	.get(RolesController._get_roles);
+	router.route('/role/:role_id')
+	.put(RolesController._update_role)
+	.get(RolesController._get_role)
+	.delete(RolesController._delete_role);
+
+	/* Actions routes */
+	router.route('/actions')
+	.get(ActionsController._get_actions);
+	router.route('/action/:id_action')
+	.put(ActionsController._update_action)
+	.get(ActionsController._get_action);
 
     
     app.use('/', router);

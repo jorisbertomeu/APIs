@@ -2,11 +2,12 @@ var mongoose     = require('mongoose');
 var Schema       = mongoose.Schema, ObjectId = Schema.ObjectId;
 
 var Board_instanceSchema   = new Schema({
-    board_id: ObjectId,
     label: String,
+    created_on: Number,
+    ceated_by: ObjectId,
     customer_id: ObjectId,
     lab_id: ObjectId,
-    created_on: Number
+    board_id: ObjectId
 });
 
 module.exports = mongoose.model('Board_instance', Board_instanceSchema);

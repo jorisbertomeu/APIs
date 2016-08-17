@@ -10,81 +10,100 @@ var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
 var multer = require('multer');
 
-
+// Utils
 var Utils = require('../utils');
-var Constants = require('../constants');
 
 // Global vars
-var upload = multer({dest: 'public/uploads/users_avatars'});
+// Path to upload user's avatar
+var upload = multer({dest: 'public/users_avatars'});
 
 
-exports._postL1 = function(req, res) {
-	var user = new User();
-	var shasum = crypto.createHash('sha1');
+// Create new user
+// Technical name "users_create_user"
+exports._create_user = function(req, res) {
 
-	Utils.checkToken(req, res, true).then(function(result) {
-		if (!result) {
-			Utils.sendUnauthorized(req, res);
-			return;
-		}
-		var missing = Utils.checkFields(req.body, ["username", "password", "isAdmin", "customers_id", "email", "sendWelcomeMail"]);
-		if (missing.length != 0)
-			return res.send({message: Utils.Constants._MSG_ARGS_, details: "Missing followwing properties : " + missing, code: Utils.Constants._CODE_ARGS_});
-		user.username = req.body.username;
-		shasum.update(req.body.password);
-		user.password = shasum.digest('hex');
-		user.created_on = Date.now() / 1000 | 0;
-		user.isAdmin = req.body.isAdmin;
-		user.customers_id = req.body.customers_id;
-		user.email = req.body.email;
+	// Check fields
+	var missing = Utils.checkFields(req.body, ["first_name", "last_name", "username", "password", "email"]);
+	if (missing.length != 0)
+		return Utils.sendMissingParams(missing);
 
-		if (req.body.sendWelcomeMail) {
-			try {
-				var mail_text = Utils.loadFile(global.config.mail.welcomeMail.templates.text);
-				var mail_html = Utils.loadFile(global.config.mail.welcomeMail.templates.html);
-			} catch (err) {
-				console.log(err);
-				return res.send({message: 'Error while fetching mail template, action canceled', details: err, code: Utils.Constants._CODE_FAILED_});
-			}
-		}
+	// Check if email is already used
+	Promise.any([Utils.getUserByEmail(req.body.email)]).then(function(userByMail) {
+		if(userByMail != null && userByMail.length > 0) {
+		 	return res.json({message: Utils.Constants._MSG_MAIL_EXIST_, details: "This email is already used", code: Utils.Constants._CODE_KO_});
+		} else {
 
-		user.save(function(err) {
-			if (err)
-				return Utils.sendError(res, err);
-			if (req.body.sendWelcomeMail) {
-				var mailOptions = {
-					from: '"' + global.config.mail.welcomeMail.settings.fromName+'"<'+global.config.mail.welcomeMail.settings.fromAddress+'>',
-					to: user.email,
-					subject: global.config.mail.welcomeMail.settings.subject,
-					text: Utils.parseWelcomeMail(mail_text, user, req),
-					html: Utils.parseWelcomeMail(mail_html, user, req)
-				};
-			}
-			if(req.files.avatar != null) {
-				upload.any(function (req, res, next){
-					res.append(req.files);
-				});
-			}
-			
-			res.json({message: Utils.Constants._MSG_CREATED_, details: user, code: Utils.Constants._CODE_CREATED_});
-			Utils.getMailTransporter().sendMail(mailOptions, function(error, info) {
-				if (error)
-					return console.log(error);
-				console.log('Message sent: ' + info.response);
+			// Check if username is already used
+			Utils.getUserByUserName(req.body.username).then(function(userByUsername) {
+				if(userByUsername != null && userByUsername.length > 0) 
+					 return res.send({message: Utils.Constants._MSG_USERNAME_EXIST_, details: "This username is already used", code: Utils.Constants._CODE_KO_});
+				else  {
+
+					var user = new User();
+					var shasum = crypto.createHash('sha1');
+
+					// Mappeig params
+					user.first_name		= req.body.first_name;
+					user.last_name		= req.body.last_name;
+					user.username 		= req.body.username;
+					shasum.update(req.body.password);
+					user.password 		= shasum.digest('hex');
+					user.email 			= req.body.email;
+					user.phone 			= req.body.phone;
+					user.created_on 	= Date.now() / 1000 | 0;
+					user.isAdmin 		= req.body.isAdmin;
+					user.customers_id 	= req.body.customers_id;
+
+					// Get welcome mail template
+					try {
+						var mail_text = Utils.loadFile(global.config.mail.welcomeMail.templates.text);
+						var mail_html = Utils.loadFile(global.config.mail.welcomeMail.templates.html);
+					} catch (err) {
+						console.log(err);
+						return res.send({message: 'Error while fetching mail template, action canceled', details: err, code: Utils.Constants._CODE_KO_});
+					}
+					// Save user
+					user.save(function(err) {
+						if (err)
+							return Utils.sendError(res, err);
+
+						// Send welcome mail
+						if (req.body.sendWelcomeMail) {
+							var mailOptions = {
+								from: '"' + global.config.mail.welcomeMail.settings.fromName+'"<'+global.config.mail.welcomeMail.settings.fromAddress+'>',
+								to: user.email,
+								subject: global.config.mail.welcomeMail.settings.subject,
+								text: Utils.parseWelcomeMail(mail_text, user, req),
+								html: Utils.parseWelcomeMail(mail_html, user, req)
+							};
+						}
+
+						// Upload avatar
+						console.log('Upload avatar :');
+						if(req.body.avatar != null) {
+							upload.any(function (req, res, next){
+								res.append(req.body.avatar);
+							});
+						}
+						console.log('End Upload!');
+						
+						res.json({message: Utils.Constants._MSG_CREATED_, details: "User successfully created", code: Utils.Constants._CODE_OK_});
+						Utils.getMailTransporter().sendMail(mailOptions, function(error, info) {
+							if (error)
+								return console.log(error);
+							console.log('Message sent: ' + info.response);
+						});
+					});	
+				}
+
 			});
-		});	
+
+		}
+
 	});
 };
 
-function randomString(len, charSet) {
-	charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-	var randomString = '';
-	for (var i = 0; i < len; i++) {
-		var randomPoz = Math.floor(Math.random() * charSet.length);
-		randomString += charSet.substring(randomPoz,randomPoz+1);
-	}
-	return randomString;
-}
+
 
 exports._postL1_logout = function(req, res) {
 	var missing = Utils.checkFields(req.body, ["username"]);
@@ -201,15 +220,23 @@ exports._postL1_login = function(req, res) {
 	});
 };
 
-exports._getL1 = function(req, res) {
-	Utils.checkToken(req, res, true).then(function(result) {
-		if (!result)
-			return Utils.sendUnauthorized(req, res);
-		User.find({}, function(err, users) {
-			if (err)
-				return Utils.sendError(res, err);
-			res.json({message: Utils.Constants._MSG_OK_, details: users, code: Utils.Constants._CODE_OK_});
+// Get all users
+// Technical name "users_get_users"
+exports._get_users = function(req, res) {
+	// Technical title : 
+	var tachnical_title = "users_get_users";
+
+	// Check if user have permission
+	Utils.isAuthorized(req, req.body.group_id, tachnical_title).then(function(isAuthorized) {
+
+		if(isAuthorized) {
+			User.find({}, function(err, users) {
+				if (err)
+					return Utils.sendError(res, err);
+				res.json({message: Utils.Constants._MSG_OK_, details: users, code: Utils.Constants._CODE_OK_});
+			});
 		});
+
 	});
 };
 
@@ -229,7 +256,7 @@ exports._getL2 = function(req, res) {
 		var result = user.toObject();
 
 	// Get User with fetching objects
-	if (req.query.full == Constants._TRUE_) {
+	if (req.query.full == Utils.Constants._TRUE_) {
 		Promise.all([
 			new Promise(function(resolve, reject){
 				Customer.find({_id: {"$in" : user.customers_id}}, function(err, customers){
@@ -305,3 +332,13 @@ exports._deleteL2 = function(req, res) {
 		});
 	});
 };
+
+function randomString(len, charSet) {
+	charSet = charSet || 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	var randomString = '';
+	for (var i = 0; i < len; i++) {
+		var randomPoz = Math.floor(Math.random() * charSet.length);
+		randomString += charSet.substring(randomPoz,randomPoz+1);
+	}
+	return randomString;
+}
