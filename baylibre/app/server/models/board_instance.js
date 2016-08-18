@@ -4,7 +4,7 @@ var Schema       = mongoose.Schema, ObjectId = Schema.ObjectId;
 var Board_instanceSchema   = new Schema({
     label: String,
     created_on: Number,
-    ceated_by: ObjectId,
+    created_by: ObjectId,
     customer_id: ObjectId,
     lab_id: ObjectId,
     board_id: ObjectId

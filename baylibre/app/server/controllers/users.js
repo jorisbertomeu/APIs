@@ -1,7 +1,10 @@
 // Import entities
-var User = require('../models/user');
-var Forgot = require('../models/forgot');
-var Customer = require('../models/customer');
+var User 			= require('../models/user');
+var Forgot 			= require('../models/forgot');
+var Customer 		= require('../models/customer');
+var Group 			= require('../models/group');
+var UserGroupRoles 	= require('../models/user_group_roles');
+var UseRoleBoardInstance = require('../models/user_role_board_instance');
 
 // Import Modules
 var Promise = require('bluebird');
@@ -227,7 +230,7 @@ exports._get_users = function(req, res) {
 	var tachnical_title = "users_get_users";
 
 	// Check if user have permission
-	Utils.isAuthorized(req, req.body.group_id, tachnical_title).then(function(isAuthorized) {
+	Utils.isAuthorized(req, tachnical_title).then(function(isAuthorized) {
 
 		if(isAuthorized) {
 			User.find({}, function(err, users) {
@@ -235,101 +238,200 @@ exports._get_users = function(req, res) {
 					return Utils.sendError(res, err);
 				res.json({message: Utils.Constants._MSG_OK_, details: users, code: Utils.Constants._CODE_OK_});
 			});
-		});
-
-	});
-};
-
-
-exports._getL2 = function(req, res) {
-	Utils.checkToken(req, res, false, req.params.user_id).then(function(result) {
-		if (!result) {
+		} else {
 			Utils.sendUnauthorized(req, res);
 			return;
 		}
-
-		User.findById(req.params.user_id, function(err, user) {
-			if (err)
-				return Utils.sendError(res, err);
-
-		// Result
-		var result = user.toObject();
-
-	// Get User with fetching objects
-	if (req.query.full == Utils.Constants._TRUE_) {
-		Promise.all([
-			new Promise(function(resolve, reject){
-				Customer.find({_id: {"$in" : user.customers_id}}, function(err, customers){
-					if(err) 
-						reject(err);
-					result.customers_id = customers;
-					console.log("resultat : " +result);
-					resolve(result);
-				});
-			})
-		]).then(function(result){
-			//Send result
-			res.json({message: Utils.Constants._MSG_OK_, details: result, code: Utils.Constants._CODE_OK_});
-		});
-
-	} else 
-			// Get user without fetching objects
-			// Send result
-			res.json({message: Utils.Constants._MSG_OK_, details: result, code: Utils.Constants._CODE_OK_});
-		});
 	});
 };
 
-exports._putL2 = function(req, res) {
-	var shasum = crypto.createHash('sha1');
-	Utils.checkToken(req, res, true, req.params.user_id).then(function(result) {
-		if (!result)
-			return Utils.sendUnauthorized(req, res);
-		User.findById(req.params.user_id, function(err, user) { 
-			if (err)
-				return Utils.sendError(res, err);
 
-			if (req.body.hasOwnProperty('name'))
-				user.name = req.body.name;
-			if (req.body.hasOwnProperty('email'))
-				user.email = req.body.email;
-			if (req.body.hasOwnProperty('password')) {
-				shasum.update(req.body.password);
-				user.password = shasum.digest('hex');
-			}
+exports._get_user = function(req, res) {
+	// Technical title : 
+	var tachnical_title = "users_get_user";
 
-			if (req.body.hasOwnProperty('customers_id') || req.body.hasOwnProperty('isAdmin')) {
-				Utils.checkToken(req, res, true).then(function(result) {
-					if (req.body.hasOwnProperty('customers_id'))
-						user.customers_id = req.body.customers_id;
-					if (req.body.hasOwnProperty('isAdmin'))
-						user.isAdmin = req.body.isAdmin;
+	// Check if user have permission
+	Utils.isAuthorized(req, tachnical_title).then(function(isAuthorized) {
+
+		if(isAuthorized) {
+
+			User.findById(req.params.user_id, function(err, user) {
+				if (err)
+					return Utils.sendError(res, err);
+	
+			// Result
+			var result = user.toObject();
+	
+		// Get User with fetching objects
+		if (req.query.full == Utils.Constants._TRUE_) {
+			Promise.all([
+				new Promise(function(resolve, reject){
+					Customer.find({_id: {"$in" : user.customers_id}}, function(err, customers){
+						if(err) 
+							reject(err);
+						result.customers_id = customers;
+						console.log("resultat : " +result);
+						resolve(result);
+					});
+				})
+			]).then(function(result){
+				//Send result
+				res.json({message: Utils.Constants._MSG_OK_, details: result, code: Utils.Constants._CODE_OK_});
+			});
+	
+		} else 
+				// Get user without fetching objects
+				// Send result
+				res.json({message: Utils.Constants._MSG_OK_, details: result, code: Utils.Constants._CODE_OK_});
+			});
+		
+		} else {
+			Utils.sendUnauthorized(req, res);
+			return;
+		}
+	});
+};
+
+exports._update_user = function(req, res) {
+	
+	// Technical title : 
+	var tachnical_title = "users_update_user";
+
+	// Check if user have permission
+	Utils.isAuthorized(req, tachnical_title).then(function(isAuthorized) {
+
+		if(isAuthorized) {
+			
+			var shasum = crypto.createHash('sha1');
+
+			User.findById(req.params.user_id, function(err, user) { 
+				if (err)
+					return Utils.sendError(res, err);
+
+				if (req.body.hasOwnProperty('name'))
+					user.name = req.body.name;
+				if (req.body.hasOwnProperty('email'))
+					user.email = req.body.email;
+				if (req.body.hasOwnProperty('password')) {
+					shasum.update(req.body.password);
+					user.password = shasum.digest('hex');
+				}
+
+				if (req.body.hasOwnProperty('customers_id') || req.body.hasOwnProperty('isAdmin')) {
+					Utils.checkToken(req, res, true).then(function(result) {
+						if (req.body.hasOwnProperty('customers_id'))
+							user.customers_id = req.body.customers_id;
+						if (req.body.hasOwnProperty('isAdmin'))
+							user.isAdmin = req.body.isAdmin;
+						user.save(function(err) {
+							if (err)
+								return Utils.SendError(res, err);
+							res.json({message: Utils.Constants._MSG_MODIFIED_, details: user, code: Utils.Constants._CODE_MODIFIED_});
+						});
+					});
+				} else {
 					user.save(function(err) {
 						if (err)
 							return Utils.SendError(res, err);
 						res.json({message: Utils.Constants._MSG_MODIFIED_, details: user, code: Utils.Constants._CODE_MODIFIED_});
 					});
-				});
-			} else {
-				user.save(function(err) {
-					if (err)
-						return Utils.SendError(res, err);
-					res.json({message: Utils.Constants._MSG_MODIFIED_, details: user, code: Utils.Constants._CODE_MODIFIED_});
-				});
-			}
-		});
+				}
+			});
+		} else {
+			Utils.sendUnauthorized(req, res);
+			return;
+		}
 });
 };
 
-exports._deleteL2 = function(req, res) {
-	Utils.checkToken(req, res, true).then(function(result) {
-		if (!result)
-			return Utils.sendUnauthorized(req, res);
-		User.remove({_id: req.params.user_id}, function(err, user) {
-			if (err)
-				return Utils.sendError(res, err);
-			res.json({message: Utils.Constants._MSG_DELETED_, details: user, code: Utils.Constants._CODE_DELETED_});
-		});
+exports._delete_user = function(req, res) {
+	// Technical title : 
+	var tachnical_title = "users_update_user";
+
+	// Check if user have permission
+	Utils.isAuthorized(req, tachnical_title).then(function(isAuthorized) {
+
+		if(isAuthorized) {
+
+			var deleteUserFromBoardInstances = new Promise(function(resolve, reject) {
+		        // Delete user from all board instances 
+				UseRoleBoardInstance.find({user_id: req.params.user_id}, function(err, listUserRoleBI) {
+					if(err) 
+						reject(err);
+					if(listUserRoleBI.length > 0) {
+
+						console.log(listUserRoleBI);
+
+						var listUserRoleBIIds = [];
+
+						// Remove user board instance role from groups
+						listUserRoleBI.forEach(function(userBIRole) {
+							listUserRoleBIIds.push(userBIRole._id);
+							// Get all groups with a user board instance role
+							Group.find({user_board_role: userBIRole._id}, function(err, grps) {
+								if(err) 
+									reject(err);
+								// Remove role user from groups
+								grps.forEach(function(grp) {
+									grps.user_board_role.splice({user_board_role: userBIRole._id}, 1);
+									grps.save(function(err) {
+										if(err) 
+											reject(err);
+										resolve(true);
+									});
+								});
+							});
+						});
+
+						UseRoleBoardInstance.remove({_id: {"$in": listUserRoleBIIds}}, function(err) {
+							if(err)
+								reject(err);
+							resolve(true);
+						});
+					} else
+						resolve(true);
+				});
+		    });
+
+		    var deleteUserFromGroupUsers = new Promise(function(resolve, reject) {
+		    	// Delete usre from all groups
+				Group.find({'users.user': req.params.user_id}, function(err, groups) {
+					console.log(groups);
+					if(groups.length > 0) {
+						groups.forEach(function(grp) {
+							// Delete user from all roles 
+							UserGroupRoles.remove({gruoup_id: grp._id, user_id: req.params.user_id}, function(err) {
+								if(err) 
+									reject(err);
+
+								// Remove old roles if exist
+					            grp.users.splice({'user': req.params.user_id}, 1);
+					            grp.save(function(err) {
+										if(err) 
+											reject(err);
+										resolve(true);
+									});
+							});
+						});
+					} else 
+						resolve(true);
+				});
+		    });
+
+
+			Promise.all([deleteUserFromBoardInstances, deleteUserFromGroupUsers]).then(function(rslt) {
+				console.log('user exist');
+				User.remove({_id: req.params.user_id}, function(err, user) {
+					if (err)
+						return Utils.sendError(res, err);
+					res.json({message: Utils.Constants._MSG_DELETED_, details: user, code: Utils.Constants._CODE_DELETED_});
+				});
+			});
+
+		} else {
+			Utils.sendUnauthorized(req, res);
+			return;
+		}
 	});
 };
 

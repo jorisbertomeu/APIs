@@ -25,6 +25,7 @@ exports._postL1 = function(req, res) {
 	board_instance.customer_id = req.body.customer_id;
 	board_instance.lab_id = req.body.lab_id;
 	board_instance.created_on = Date.now() / 1000 | 0;
+	board_instance.created_by = req.body.created_by;
 	board_instance.save(function(err) {
 	    if (err)
 		res.send(err);

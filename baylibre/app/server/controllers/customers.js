@@ -13,8 +13,8 @@ exports._postL1 = function(req, res) {
 	customer.company = req.body.company;
 	customer.address = req.body.address;
 	customer.telephone = req.body.telephone;
-	customer.board_instances = req.body.board_instances;
-	customer.users_id = req.body.users_id;
+	//customer.board_instances = req.body.board_instances;
+	customer.user_id = req.body.user_id;
     
 	customer.save(function(err) {
 	    if (err)

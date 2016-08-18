@@ -16,7 +16,7 @@ exports.Constants = Constants;
 
 
 // Is authorized
-exports.isAuthorized = function(req, group_Id, action_techincal_title) {
+exports.isAuthorized = function(req, action_techincal_title) {
     return new Promise(function(resolve, reject) {
         User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
             if (err)
@@ -25,30 +25,32 @@ exports.isAuthorized = function(req, group_Id, action_techincal_title) {
                 return resolve(false);
             if(user.isAdmin) 
                 return resolve(true);
+            if(null != req.body.group_id && isNotEmpty(req.body.group_id)) {
+                // Check if the action is in the user's role
+                UserRoleGroup.findOne({user_id: user._id, gruoup_id: group_Id}, function(err, userRoleGroup){
+                    if(err) 
+                        return reject(err);
+                    if(userRoleGroup != null) {
+                        Role.findById(userRoleGroup.role_id).populate("actions_list").exec(function(err, role){
+                            if(role) {
+                                role.actions_list.forEach(function(action) {
+                                    var access = false;
+                                    if(action.technical_title == action_techincal_title) 
+                                        access = true;
+                                    if(access)
+                                        return resolve(true);
+                                    else 
+                                        return resolve(false);
+                                });
+                            } else 
+                                return resolve(false);
+                        });
 
-            // Check if the action is in the user's role
-            UserRoleGroup.findOne({user_id: user._id, gruoup_id: group_Id}, function(err, userRoleGroup){
-                if(err) 
-                    return reject(err);
-                if(userRoleGroup != null) {
-                    Role.findById(userRoleGroup.role_id).populate("actions_list").exec(function(err, role){
-                        if(role) {
-                            role.actions_list.forEach(function(action) {
-                                var access = false;
-                                if(action.technical_title == action_techincal_title) 
-                                    access = true;
-                                if(access)
-                                    return resolve(true);
-                                else 
-                                    return resolve(false);
-                            });
-                        } else 
-                            return resolve(false);
-                    });
-
-                } else 
-                    return resolve(false);
-            });
+                    } else 
+                        return resolve(false);
+                });
+            } else 
+                return resolve(false);
         });
     });
 
@@ -56,6 +58,7 @@ exports.isAuthorized = function(req, group_Id, action_techincal_title) {
 
 exports.checkToken = function(req, res, mustBeAdmin, userId) {
     return new Promise(function(resolve, reject) {
+        /*
         //console.log("users id :" + userId);
     	User.findOne({'user_tokens': req.headers.authorization}, function(err, user) {
     	    if (err)
@@ -79,6 +82,8 @@ exports.checkToken = function(req, res, mustBeAdmin, userId) {
     		    return resolve(false);
     	    return resolve(true);
     	});
+        */
+        return resolve(true);
     });
 };
 
@@ -297,7 +302,6 @@ exports.removeUserRoleBoardInstance = function(groupId, userId, boardInstanceId)
         });
     });
 }
-
 
 // Get user by token
 exports.getUserByToken = function(req) {

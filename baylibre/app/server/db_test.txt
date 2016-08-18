@@ -1,0 +1,31 @@
+// Create user
+db.users.insert({_id: ObjectId("57b46b71757a93477f000003"), first_name: 'Younes', last_name: 'BOULAAYNINE', username: 'admin', password: 'd033e22ae348aeb5660fc2140aec35850c4da997', email: 'yboulaaynine@baylibre.fr', phone: '0758368307', created_on: 1471441777, isAdmin: true });
+
+db.users.insert({_id: ObjectId("57b46b71757a93477f000004"), first_name: 'Arnaud', last_name: 'Moussa', username: 'root', password: 'd033e22ae348aeb5660fc2140aec35850c4da997', email: 'aMoussa@baylibre.fr', phone: '0758368307', created_on: 1471441777, isAdmin: true });
+
+// Create Lab
+db.labs.insert({_id: ObjectId("57b46edfc562bd493c000004"), name: 'lab 1', lava_url: 'lava_url', short_location: 'short_location', location_long: 'location_long', location_lat: 'location_lat', contact: 'contact', status: 'status' });
+
+// Create Customer
+db.customers.insert({_id: ObjectId("57b47073adb1a9fc3c000002"), name: 'Customer 1', company: 'Company 1', address: 'Adresse customer', telephone: '0666768830', user_id: ObjectId("57b46b71757a93477f000003") })
+
+// Create Board
+db.boards.insert({_id: ObjectId("57b4735fd93f12d33d000002"), name: 'Board 1', sub_name: 'sub board 1', manufacturer: 'manufacturer', model: 'model', created_by: ObjectId("57b46b71757a93477f000003"), created_on: 1471443807, nb_units: 12, nb_use_cases: 5 });
+
+// Create Board Instance
+db.board_instances.insert({_id: ObjectId("57b47463d8537b1d3e000002"), board_id: ObjectId("57b4735fd93f12d33d000002"), label: 'Board instance 1', customer_id: ObjectId("57b47073adb1a9fc3c000002"), lab_id: ObjectId("57b46edfc562bd493c000004"), created_on: 1471444067 });
+
+// Create Role
+db.roles.insert({_id: ObjectId("57b47650d5da48cf3e000002"), actions_list: [ ObjectId("57b2e8506fce543fdee426d0"), ObjectId("57b2e8526fce543fdee426d1"), ObjectId("57b312c36fce543fdee426d2"), ObjectId("57b474fd03ea22b82462551f"), ObjectId("57b474ff03ea22b824625520") ], title: 'Role 1', description: 'Description role 1' });
+
+db.roles.insert({_id: ObjectId("57b47650d5da48cf3e000011"), actions_list: [ ObjectId("57b2e8506fce543fdee426d0"), ObjectId("57b2e8526fce543fdee426d1"), ObjectId("57b312c36fce543fdee426d2"), ObjectId("57b474fd03ea22b82462551f"), ObjectId("57b474ff03ea22b824625520") ], title: 'Role 2', description: 'Description role 2' });
+
+// Create user role board instance
+db.user_role_board_instances.insert({_id: ObjectId("57b4779103ea22b824625521"), user_id: "57b46b71757a93477f000003", role_id: "57b47650d5da48cf3e000002", board_instance_id: "57b47463d8537b1d3e000002"});
+db.user_role_board_instance.insert({_id: ObjectId("57b4779103ea22b824625522"), user_id: "57b46b71757a93477f000004", role_id: "57b47650d5da48cf3e000002", board_instance_id: "57b47463d8537b1d3e000002"});
+
+// Create Group
+db.groups.insert({_id: ObjectId("57b56799f322eac96d000002"), users: [{ user: ObjectId("57b46b71757a93477f000004"), role: ObjectId("57b47650d5da48cf3e000011"), _id: ObjectId("57b56799f322eac96d000003") }, { user: ObjectId("57adb67b9118298e77000002"), role: ObjectId("57a9acba012138fa7d000001"), _id: ObjectId("57b56799f322eac96d000004")}], board_instances: [], user_board_role: [], name: 'Group 1', description: 'Description group 1' });
+
+db.user_role_board_instance.find({_id: ObjectId("57b4779103ea22b824625522")});
+db.groups.find({_id: ObjectId("57b56799f322eac96d000004") });

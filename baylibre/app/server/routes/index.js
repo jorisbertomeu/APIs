@@ -96,9 +96,9 @@ module.exports = function(app, express) {
     router.route('/logout')
 	.post(UsersController._postL1_logout);
     router.route('/users/:user_id')
-	.get(UsersController._getL2)
-	.delete(UsersController._deleteL2)
-	.put(UsersController._putL2);
+	.get(UsersController._get_user)
+	.put(UsersController._update_user)
+	.delete(UsersController._delete_user);
 
     /* PROJECT RES */
     router.route('/projects')
@@ -153,7 +153,7 @@ module.exports = function(app, express) {
 	router.route('/group/board_instance/:board_instance_id')
 	.delete(GroupsController._remove_board_instance);
 	router.route('/group/add_user_in_board_instance')
-	.post(GroupsController._add_user_board_instance),
+	.post(GroupsController._add_user_board_instance)
 	.delete(GroupsController._remove_user_board_instance);
 
 

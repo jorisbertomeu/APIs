@@ -1,11 +1,12 @@
-var mongoose     = require('mongoose');
-var Schema       = mongoose.Schema;
+var mongoose    = require('mongoose');
+var Schema     	= mongoose.Schema;
+var ObjectId	= Schema.ObjectId;
 var Action	=	require('../models/action');
 
 var RoleSchema   = new Schema({
 	title: String,
 	description: String,
-	actions_list:[{type: Number, ref: 'Action'}]
+	actions_list:[{type: ObjectId, ref: 'Action'}]
 
 });
 

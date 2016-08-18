@@ -1,22 +1,14 @@
-var app = angular.module('app', ['ngRoute'])
-			.directive('ngFiles', ['$parse', function ($parse) {
+var app = angular.module('app', ['ngRoute']);
 
-		            function fn_link(scope, element, attrs) {
-		                var onChange = $parse(attrs.ngFiles);
-		                element.on('change', function (event) {
-		                    onChange(scope, { $files: event.target.files });
-		                });
-		            };
+app.controller('indexCtrl',  function($scope){
+		$scope.titre = "Users service !!";
 
-		            return {
-		                link: fn_link
-		            }
-		        } ]);
+});
 
-app.config(['$routeProvider',function($routeProvider) {
+ app.config(['$routeProvider', function($routeProvider) {
 
-	$httpProvider.defaults.useXDomain = true;
-  	delete $httpProvider.defaults.headers.common['X-Requested-With'];
+	// $httpProvider.defaults.useXDomain = true;
+ //  	delete $httpProvider.defaults.headers.common['X-Requested-With'];
 
 
 	$routeProvider
@@ -27,17 +19,15 @@ app.config(['$routeProvider',function($routeProvider) {
 		.when('/addUser', {
 			templateUrl : 'addUser.html',
 			controller : 'addUserController'
-		}).when('/editUsers/:id', {
-			templateUrl : 'editUser.html',
-			controller : 'editUserController'
 		})
-		.otherwise({redirectTo : '/'});
-	}])
-	.controller('indexCtrl',  function($scope){
-		$scope.titre = "Users service !!";
+	//.when('/editUsers/:id', {
+	// 		templateUrl : 'editUser.html',
+	// 		controller : 'editUserController'
+	// 	})
+	 	.otherwise({redirectTo : '/'});
+ }]);
 
-		});
-app.controller('showUsersController', function($scope, $http){
+ app.controller('showUsersController', function($scope, $http){
 		$scope.contenu = "show all users :";
 
 		// Call get all users service
@@ -54,44 +44,42 @@ app.controller('showUsersController', function($scope, $http){
 
 		});
 	});
-app.controller('addUserController', function($scope, $http){
-		$scope.contenu = "Add User :";
-		$scope.user = {};
-		$scope.userFirstName;
 
-		var formdata = new FormData();
-        $scope.getTheFiles = function ($files) {
-            angular.forEach($files, function (value, key) {
-                formdata.append(key, value);
-            });
+app.controller('addUserController', function($scope, $http){
+	$scope.contenu = "Add User :";
+	$scope.user = {};
+	$scope.userFirstName;
+
+	var formdata = new FormData();
+    $scope.getTheFiles = function ($files) {
+        angular.forEach($files, function (value, key) {
+            formdata.append(key, value);
+        });
+    };
+
+    // NOW UPLOAD THE FILES.
+    $scope.saveUser = function (user) {
+
+    	console.log(user);
+
+        var request = {
+            method: 'POST',
+            url: 'http://localhost:8080/users',
+            headers: {
+            	'Content-Type': 'application/json',
+                'Authorization': 'Y1TIM4ARNgZtd7RTIWw9lOuXZSuBHzR1FlYziYHEO3'
+            },
+		    data: user
         };
 
-        // NOW UPLOAD THE FILES.
-        $scope.saveUser = function (user) {
-
-        	console.log(user);
-
-            var request = {
-                method: 'POST',
-                url: 'http://localhost:8080/users',
-                headers: {
-                	'Content-Type': 'application/json',
-                    'Authorization': 'Y1TIM4ARNgZtd7RTIWw9lOuXZSuBHzR1FlYziYHEO3'
-                },
-			    data: user
-            };
-
-            // SEND THE FILES.
-            $http(request)
-                .success(function (d) {
-                    console.log(d);
-                })
-                .error(function (e) {
-                	console.log(e);
-                });
+        // SEND THE FILES.
+        $http(request)
+            .success(function (d) {
+                console.log(d);
+            })
+            .error(function (e) {
+            	console.log(e);
+            });
         }
-	});
-
-
-
+});
 
