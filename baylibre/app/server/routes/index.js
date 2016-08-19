@@ -95,10 +95,12 @@ module.exports = function(app, express) {
 	.post(UsersController._postL1_login);
     router.route('/logout')
 	.post(UsersController._postL1_logout);
-    router.route('/users/:user_id')
-	.get(UsersController._get_user)
+    router.route('/user/:user_id')
+	.get(UsersController._get_user_by_id)
 	.put(UsersController._update_user)
 	.delete(UsersController._delete_user);
+	router.route('/users/find/:requestString')
+	.get(UsersController._find_user)
 
     /* PROJECT RES */
     router.route('/projects')
@@ -158,9 +160,10 @@ module.exports = function(app, express) {
 
 
 	/* Role routes */
-	router.route('/role')
-	.post(RolesController._create_role)
+	router.route('/roles')
 	.get(RolesController._get_roles);
+	router.route('/role')
+	.post(RolesController._create_role);
 	router.route('/role/:role_id')
 	.put(RolesController._update_role)
 	.get(RolesController._get_role)

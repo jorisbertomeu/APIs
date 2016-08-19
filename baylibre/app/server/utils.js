@@ -313,3 +313,7 @@ exports.getUserByToken = function(req) {
         });
     });
 };
+
+function echo (string) {
+    console.log(string);
+}

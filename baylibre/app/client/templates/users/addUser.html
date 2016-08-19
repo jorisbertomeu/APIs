@@ -1,0 +1,20 @@
+{{contenu}}
+<span ng-show='message.length > 0'>
+        message : {{message}}
+</span>
+
+<pre>
+FirstName   : <input type="text" ng-model="user.first_name">
+LastName    : <input type="text" ng-model="user.last_name">
+UserName    : <input type="text" ng-model="user.username">
+Password    : <input type="password" ng-model="user.password">
+Email       : <input type="text" ng-model="user.email">
+Is Admin    : <select ng-model="user.isAdmin">
+		<option value="">---Please select---</option>
+	<option value="true">Yes</option>
+		<option value="false">No</option>
+</select>
+User avatar : <input type="file" ngf-select="" ng-model="user.avatar" name="file" ngf-accept="'image/*'" required="">
+
+</pre>
+<input type="button" ng-click="saveUser(user)" value="Save" />

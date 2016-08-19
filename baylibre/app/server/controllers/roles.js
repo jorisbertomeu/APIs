@@ -73,8 +73,6 @@ exports._get_roles= function(req, res) {
 				// Check error
 				if(err) 
 					res.send(err);
-
-				console.log(Utils.Constants.user_create_user);
 				// Send roles
 				res.json(roles);
 			});

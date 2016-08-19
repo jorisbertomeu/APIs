@@ -1,0 +1,31 @@
+{{contenu}}
+<span ng-show='message.length > 0'>
+        message : {{message}}
+</span>
+<pre>
+	FirstName   : <input type="text" ng-model="requestString">
+	<input type="button" ng-click="findUser(requestString)" value="Search" />
+</pre>
+
+<span ng-show='users != null && users.length > 0'>
+    <div class="col-md-4" ng-repeat="user in users">
+		<div class="panel panel-primary">
+			<div class="panel-body">
+				<pre>
+	IdUser 		: {{user._id}}
+	FName 		: {{ user.first_name }}
+	LName 		: {{ user.last_name }}
+	Username 	: {{ user.username }}
+	Email 		: {{ user.email }}
+	Created on 	: {{ user.created_on }}
+	Is admin 	: {{ user.isAdmin }}
+	Avatar 		: {{ user.avatar }}
+	<a ng-href="#detailUser/{{user._id}}"">Detail</a>---<a ng-href="#editUser/{{user._id}}"">Edit</a>---<a ng-href="#deleteUser/{{user._id}}">Delete</a><br>
+	-----------------------------
+					<br>
+				</pre>
+			</div>
+
+		</div>
+	</div>
+</span>

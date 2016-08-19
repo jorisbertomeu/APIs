@@ -12,8 +12,9 @@ db.actions.insert({title:"Add user - board instance roles", technical_name:"grou
 db.actions.insert({title:"create user", technical_name:"groups_remove_user_board_instance"});
 // users actions
 users_get_users
-users_get_user
+users_get_user_by_id
 users_update_user
 users_delete_user
+users_find_user
 
 

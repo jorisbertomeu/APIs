@@ -7,7 +7,6 @@ var RoleSchema   = new Schema({
 	title: String,
 	description: String,
 	actions_list:[{type: ObjectId, ref: 'Action'}]
-
 });
 
 module.exports = mongoose.model('Role', RoleSchema);

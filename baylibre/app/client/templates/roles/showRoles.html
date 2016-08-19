@@ -1,0 +1,23 @@
+{{contenu}}<br>
+<span ng-show='message.length > 0'>
+        message : {{message}}
+</span>
+
+<div class="col-md-4" ng-repeat="role in roles">
+	<div class="panel panel-primary">
+		<div class="panel-body">
+			<pre>
+	Id 		: {{role._id}}
+	Title 		: {{role.title}}
+	list actions 	: <div class="col-md-4" ng-repeat="action in role.actions_list">
+				- {{action.title}}
+					</div>
+
+	<a ng-href="#detailUser/{{user._id}}"">Detail</a>---<a ng-href="#editUser/{{user._id}}"">Edit</a>---<a ng-href="#deleteUser/{{user._id}}">Delete</a><br>
+	-----------------------------
+				<br>
+			</pre>
+		</div>
+
+	</div>
+</div>

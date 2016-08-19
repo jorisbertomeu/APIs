@@ -231,7 +231,6 @@ exports._get_users = function(req, res) {
 
 	// Check if user have permission
 	Utils.isAuthorized(req, tachnical_title).then(function(isAuthorized) {
-
 		if(isAuthorized) {
 			User.find({}, function(err, users) {
 				if (err)
@@ -246,9 +245,9 @@ exports._get_users = function(req, res) {
 };
 
 
-exports._get_user = function(req, res) {
+exports._get_user_by_id = function(req, res) {
 	// Technical title : 
-	var tachnical_title = "users_get_user";
+	var tachnical_title = "users_get_user_by_id";
 
 	// Check if user have permission
 	Utils.isAuthorized(req, tachnical_title).then(function(isAuthorized) {
@@ -258,31 +257,33 @@ exports._get_user = function(req, res) {
 			User.findById(req.params.user_id, function(err, user) {
 				if (err)
 					return Utils.sendError(res, err);
-	
-			// Result
-			var result = user.toObject();
-	
-		// Get User with fetching objects
-		if (req.query.full == Utils.Constants._TRUE_) {
-			Promise.all([
-				new Promise(function(resolve, reject){
-					Customer.find({_id: {"$in" : user.customers_id}}, function(err, customers){
-						if(err) 
-							reject(err);
-						result.customers_id = customers;
-						console.log("resultat : " +result);
-						resolve(result);
-					});
-				})
-			]).then(function(result){
+
 				//Send result
-				res.json({message: Utils.Constants._MSG_OK_, details: result, code: Utils.Constants._CODE_OK_});
+				res.json({message: Utils.Constants._MSG_OK_, details: user, code: Utils.Constants._CODE_OK_});
 			});
-	
-		} else 
-				// Get user without fetching objects
-				// Send result
-				res.json({message: Utils.Constants._MSG_OK_, details: result, code: Utils.Constants._CODE_OK_});
+		
+		} else {
+			Utils.sendUnauthorized(req, res);
+			return;
+		}
+	});
+};
+
+exports._find_user = function(req, res) {
+	// Technical title : 
+	var tachnical_title = "users_find_user";
+
+	// Check if user have permission
+	Utils.isAuthorized(req, tachnical_title).then(function(isAuthorized) {
+
+		if(isAuthorized) {
+
+			User.find({$or :[{username: new RegExp('.*' + req.params.requestString + '.*')}, {first_name: new RegExp('.*' + req.params.requestString)}]}, function(err, user) {
+				if (err)
+					return Utils.sendError(res, err);
+
+				//Send result
+				res.json({message: Utils.Constants._MSG_OK_, details: user, code: Utils.Constants._CODE_OK_});
 			});
 		
 		} else {
@@ -308,14 +309,22 @@ exports._update_user = function(req, res) {
 				if (err)
 					return Utils.sendError(res, err);
 
-				if (req.body.hasOwnProperty('name'))
-					user.name = req.body.name;
 				if (req.body.hasOwnProperty('email'))
 					user.email = req.body.email;
 				if (req.body.hasOwnProperty('password')) {
 					shasum.update(req.body.password);
 					user.password = shasum.digest('hex');
 				}
+				if (req.body.hasOwnProperty('first_name'))
+					user.first_name		= req.body.first_name;
+				if (req.body.hasOwnProperty('last_name'))
+					user.last_name		= req.body.last_name;
+				if (req.body.hasOwnProperty('username'))
+					user.username 		= req.body.username;
+				if (req.body.hasOwnProperty('phone'))
+					user.phone 			= req.body.phone;
+				if (req.body.hasOwnProperty('isAdmin'))
+					user.isAdmin 		= req.body.isAdmin;
 
 				if (req.body.hasOwnProperty('customers_id') || req.body.hasOwnProperty('isAdmin')) {
 					Utils.checkToken(req, res, true).then(function(result) {
@@ -443,4 +452,9 @@ function randomString(len, charSet) {
 		randomString += charSet.substring(randomPoz,randomPoz+1);
 	}
 	return randomString;
+}
+
+
+function echo (string) {
+	console.log(string);
 }
