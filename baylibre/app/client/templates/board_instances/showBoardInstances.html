@@ -1,0 +1,15 @@
+{{contenu}}<br>
+<span ng-show='message.length > 0' style="color:red">
+        message : {{message}}
+</span>
+<div class="col-md-4" ng-repeat="boardInstance in boardInstances">
+			<pre>
+	Id 		: {{boardInstance._id}}
+	Title 		: {{boardInstance.label}}
+	Description 	: {{boardInstance.description}}
+	Created on 	: {{boardInstance.created_on * 1000 | date:"MM/dd/yyyy 'at' h:mma"}}
+	<!-- list actions 	: <div class="col-md-4" ng-repeat="action in role.actions_list"> 		- {{action.title}}	</div> -->
+	<a ng-href="#detailBoardInstance/{{boardInstance._id}}"">Detail</a>---<a ng-href="#editBoardInstance/{{boardInstance._id}}"">Edit</a>---<a ng-href="#deleteBoardInstance/{{boardInstance._id}}">Delete</a><br>
+	-----------------------------
+			</pre>
+</div>

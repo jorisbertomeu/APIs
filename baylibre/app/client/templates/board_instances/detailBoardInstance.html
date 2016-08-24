@@ -1,0 +1,36 @@
+{{contenu}}<br>
+<span ng-show='message.length > 0' style="color:red">
+        message : {{message}}
+</span>
+
+			<pre>
+	Id 		: {{boardInstance._id}}
+	Title 		: {{boardInstance.label}}
+	Description 	: {{boardInstance.description}}
+	Created on 	: {{boardInstance.created_on * 1000 | date:"MM/dd/yyyy 'at' h:mma"}}
+
+	Board : 
+		- Board_id 	: {{boardInstance.board_id._id}}
+		- Name 		: {{boardInstance.board_id.name}}
+		- Manufacturer 	: {{boardInstance.board_id.manufacturer}}
+		- Model 	: {{boardInstance.board_id.model}}
+
+	Organisation :
+		- Organisation_Id 	: {{boardInstance.customer_id._id}}
+		- Name 			: {{boardInstance.customer_id.name}}
+		- Company 		: {{boardInstance.customer_id.company}}
+		- Address 		: {{boardInstance.customer_id.address}}
+		- Phone 		: {{boardInstance.customer_id.telephone}}
+
+	Lab :
+		- Lab_id 		: {{boardInstance.lab_id._id}}
+		- Name 			: {{boardInstance.lab_id.name}}
+		- Url 			: {{boardInstance.lab_id.lava_url}}
+		- Contact 		: {{boardInstance.lab_id.contact}}
+		- Location lat 		: {{boardInstance.lab_id.location_lat}}
+		- Location long 	: {{boardInstance.lab_id.location_long}}
+		- Short location 	: {{boardInstance.lab_id.short_location}}
+		- Status 		: {{boardInstance.lab_id.status}}
+	<a ng-href="#editBoardInstance/{{boardInstance._id}}"">Edit</a>---<a ng-href="#deleteBoardInstance/{{boardInstance._id}}">Delete</a><br>
+	-----------------------------
+			</pre>

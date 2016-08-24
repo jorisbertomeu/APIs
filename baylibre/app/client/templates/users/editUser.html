@@ -1,5 +1,5 @@
 {{contenu}}
-<span ng-show='message.length > 0'>
+<span ng-show='message.length > 0' style="color:red">
         message : {{message}}
 </span>
 
@@ -8,11 +8,11 @@ FirstName   : <input type="text" ng-model="user.first_name"><br>
 LastName    : <input type="text" ng-model="user.last_name"><br>
 UserName    : <input type="text" ng-model="user.username"><br>
 Email       : <input type="text" ng-model="user.email"><br>
-Is Admin    : <select ng-model="user.isAdmin">
-		<option value="">---Please select---</option>
-	<option value="true">Yes</option>
-		<option value="false">No</option>
-</select><br>
+Is Admin    : <select ng-model="user.isAdmin" ng-init="user.isAdmin">
+				<option value="0">---Please select---</option>
+				<option value="true">Yes</option>
+				<option value="false" selected="true">No</option>
+			  </select>{{user.isAdmin}}<br>
 User avatar : <input type="file" ngf-select="" ng-model="user.avatar" name="file" ngf-accept="'image/*'" required=""></br>
 
 </pre>

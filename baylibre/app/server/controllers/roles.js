@@ -1,6 +1,8 @@
 // Mapped Objects
 var Role = require('../models/role');
 var Action	=	require('../models/action');
+var UserRoleBoaredInstance	=	require('../models/user_role_board_instance');
+var UserGroupRoles	=	require('../models/user_group_roles');
 
 // Import Modules
 var Promise = require('bluebird');
@@ -26,33 +28,28 @@ exports._create_role = function(req, res) {
     	// Check request parms
     	missing = Utils.checkFields(req.body, [param_title, param_actions_list]);
     	if(missing.length !=0) 
-    		return Utils.sendMissingParams(missing);
+    		return Utils.sendMissingParams(res, missing);
 
     	Promise.any([Utils.getRoleByTitle(req.body.title)]).then(function(roles) {
     		if(roles != null && roles.length > 0) 
 				return res.send({message: Utils.Constants._MSG_GROUP_NAME_EXIST_, details: "Role title is already used", code: Utils.Constants._CODE_KO_});
 			else {
-
+				var role 			= new Role();
 				// Mpping request params
-		    	var role 			= new Role();
 			    role.title 			= req.body.title;
 		    	role.description 	= req.body.description;
 		    	role.actions_list 	= req.body.actions_list;
 
-			    // Save object
-			    role.save(function(err){
+	    		role.save(function(err){
 			    	// Check errors
 			    	if(err)
 			    		res.send(err);
-			    	
 			    	// Send ok message
-			    	res.json({message: 'Role created!'});
+			    	res.json({message: "User created successfully", details: role, code: Utils.Constants._CODE_OK_});
 		    	});
 			}
     	});
-    	
     });
-    
 };
 
 // Get list of roles
@@ -66,7 +63,6 @@ exports._get_roles= function(req, res) {
 			return;
 		}
 		if (req.query.full == Utils.Constants._TRUE_) {
-			console.log(Utils.Constants.user_create_user);
 			// Get list of roles with actions detail
 			Role.find().populate('actions_list')
 				.exec(function(err, roles) {
@@ -74,7 +70,7 @@ exports._get_roles= function(req, res) {
 				if(err) 
 					res.send(err);
 				// Send roles
-				res.json(roles);
+				res.json({message: Utils.Constants._MSG_OK_, details: roles, code: Utils.Constants._CODE_OK_});
 			});
 
 		} else {
@@ -84,7 +80,7 @@ exports._get_roles= function(req, res) {
 				if(err) 
 					res.send(err);
 				// Send roles
-				res.json(roles);
+				res.json({message: Utils.Constants._MSG_OK_, details: roles, code: Utils.Constants._CODE_OK_});
 			});
 		}
 		
@@ -105,7 +101,7 @@ exports._get_role = function(req, res) {
 					// Send error
 					res.send(err);
 				// Send result
-				res.json(role);
+				res.json({message: Utils.Constants._MSG_OK_, details: role, code: Utils.Constants._CODE_OK_});
 			});
 		} else {
 			Role.findById(req.params.role_id, function(err, role){
@@ -113,8 +109,38 @@ exports._get_role = function(req, res) {
 					// Send error
 					res.send(err);
 				// Send result
-				res.json(role);
+				res.json({message: Utils.Constants._MSG_OK_, details: role, code: Utils.Constants._CODE_OK_});
 			});
+		}
+	});
+};
+
+
+// Find role service
+exports._find_role = function(req, res) {
+	// Technical title : 
+	var tachnical_title = "roles_find_role";
+
+	// Check if user have permission
+	Utils.isAuthorized(req, tachnical_title).then(function(isAuthorized) {
+
+		if(isAuthorized) {
+
+			Role.find({$or :[
+								{title: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
+								{description: new RegExp('.*' + req.params.requestString + '.*',"i")}
+							]
+						}, function(err, roles) {
+				if (err)
+					return Utils.sendError(res, err);
+
+				//Send result
+				res.json({message: Utils.Constants._MSG_OK_, details: roles, code: Utils.Constants._CODE_OK_});
+			});
+		
+		} else {
+			Utils.sendUnauthorized(req, res);
+			return;
 		}
 	});
 };
@@ -175,20 +201,41 @@ exports._update_role = function(req, res) {
 
 // Delete role
 exports._delete_role = function(req, res) {
-	// Get project by Id
+	// Get Role by Id
 	Role.findById(req.params.role_id, function(err, role){
 		if(err)
 			res.send(err);
 		else if(role != null) {
-	
-			// delete project
-			Role.remove({_id : req.params.role_id }, function(err) {
-				if(err)
-					res.send(err);
-				res.json({message : 'Role saccessfully deleted!'});
+
+			var deleteRoleFromBoardInstances = new Promise(function(resolve, reject) {
+				UserRoleBoaredInstance.remove({role_id : role._id}, function(err) {
+					if(err) reject(err);
+					resolve(true);
+				});
 			});
+
+			var deleteRoleFromGroups = new Promise(function(resolve, reject) {
+				UserGroupRoles.remove({role_id : role._id}, function(err) {
+					if(err) reject(err);
+					resolve(true);
+				});
+			});
+
+			Promise.all([deleteRoleFromBoardInstances, deleteRoleFromGroups]).then(function(rslt) {
+				// delete project
+				Role.remove({_id : req.params.role_id }, function(err) {
+					if(err)
+						res.send(err);
+					res.json({message : 'Role saccessfully deleted!'});
+				});
+			});
+
 		} else 
 			// No project found for this Id
 			res.json({message : 'Role not found!'});
 	});
 };
+
+function echo(string) {
+	console.log(string);
+}

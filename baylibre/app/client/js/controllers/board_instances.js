@@ -1,38 +1,74 @@
-app.controller('showRolesController', function($scope, $http){
+// Show all board instances
+app.controller('showBoardInstancesController', function($scope, $http){
 		$scope.contenu = "show roles :";
-		$scope.actions_selected = {};
 
-		// Call get all roles service
+		// Call get all board instances service
 		$http({
 	            method: 'GET',
-	            url: 'http://localhost:8080/roles?full=true',
+	            url: 'http://localhost:8080/board_instances/',
 	            dataType: 'jsonp',
 	            headers: {'Authorization': temp_token}
 	         }).then(function(response) {
                 console.log(response);
-			$scope.roles = response.data.details;
-
-
-		});
-});
-app.controller('detailRoleController', function($scope, $http, $routeParams){
-		$scope.contenu = "show role :";
-
-		// Call get all roles service
-		$http({
-	            method: 'GET',
-	            url: 'http://localhost:8080/role/' + $routeParams.id + '?full=true',
-	            dataType: 'jsonp',
-	            headers: {'Authorization': temp_token}
-	         }).then(function(response) {
-                console.log(response);
-			$scope.role = response.data.details;
+			$scope.boardInstances = response.data.details;
 
 
 		});
 });
 
 
+// Get Board instance details
+app.controller('detailBoardInstanceController', function($scope, $http, $routeParams){
+		$scope.contenu = "Show board instance details :";
+
+		// Call get all roles service
+		$http({
+	            method: 'GET',
+	            url: 'http://localhost:8080/board_instance/' + $routeParams.id + '?full=true',
+	            dataType: 'jsonp',
+	            headers: {'Authorization': temp_token}
+	         }).then(function(response) {
+                console.log(response);
+			$scope.boardInstance = response.data.details;
+
+
+		});
+});
+
+// Add new board instance
+app.controller('addBoardInstanceController', function($scope, $http, $location){
+
+	$scope.contenu = "Add Board instance :";
+	$scope.boardInstance = {};
+
+	$scope.boardInstance.customer_id ="576d46649643f69d1e000001";
+	$scope.boardInstance.lab_id ="576d3ca34e533e251d000002";
+	$scope.boardInstance.board_id ="576d099e1788e75d13000001";
+
+    $scope.saveBoardInstance = function (boardInstance) {
+    	echo(boardInstance);
+    	var request = {
+        method: 'POST',
+        url: 'http://localhost:8080/board_instance/',
+        headers: {
+        	'Content-Type': 'application/json',
+            'Authorization': temp_token
+        },
+	    data: boardInstance
+    };
+
+    // SEND THE FILES.
+    $http(request)
+        .success(function (response) {
+            $location.path('/detailBoardInstance/' + response.details._id);
+        })
+        .error(function (e) {
+        	console.log(e);
+        });
+    }
+});
+
+/*
 //Find role controller
  app.controller('findRoleController', function($scope, $http, $routeParams){
 	$scope.contenu = "Find roles :";
@@ -130,66 +166,7 @@ app.controller('editRoleController', function($scope, $http, $routeParams, $loca
 
 
 
-app.controller('addRoleController', function($scope, $http){
 
-		$scope.contenu = "Add role :";
-		$scope.role = {};
-		$scope.actions_selected = [];
-		$scope.actions_list = {};
-
-		// Call get all roles service
-		$http({
-	            method: 'GET',
-	            url: 'http://localhost:8080/actions',
-	            dataType: 'jsonp',
-	            headers: {'Authorization': temp_token}
-	         }).then(function(response) {
-                console.log(response);
-			$scope.actions_list = response.data.details;
-
-		});
-
-
-	    $scope.saveRole = function (role) {
-	    	role.actions_list = $scope.actions_selected;
-	    	console.log(role);
-
-	    	var request = {
-            method: 'POST',
-            url: 'http://localhost:8080/role/',
-            headers: {
-            	'Content-Type': 'application/json',
-                'Authorization': temp_token
-            },
-		    data: role
-        };
-
-        // SEND THE FILES.
-        $http(request)
-            .success(function (response) {
-                $scope.role = {};
-                $location.path('/detailRole/' + response.details._id);
-            })
-            .error(function (e) {
-            	console.log(e);
-            });
-        }
-
-	     // toggle selection for a given role by name
-		  $scope.toggleSelection = function toggleSelection(actionId) {
-		    var idx = $scope.actions_selected.indexOf(actionId);
-
-		    // is currently selected
-		    if (idx > -1) {
-		      $scope.actions_selected.splice(idx, 1);
-		    }
-
-		    // is newly selected
-		    else {
-		      $scope.actions_selected.push(actionId);
-		    }
-		  };
-});
 
 app.controller('deleteRoleController', function($scope, $http, $routeParams){
 	$scope.contenu = "show roles :";
@@ -222,6 +199,8 @@ app.controller('deleteRoleController', function($scope, $http, $routeParams){
 
 		});
 });
+
+*/
 
 function echo(String) {
 	console.log(String);

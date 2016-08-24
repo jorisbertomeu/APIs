@@ -1,0 +1,12 @@
+{{contenu}}
+<span ng-show='message.length > 0' style="color:red">
+        message : {{message}}
+</span>
+<pre>
+Title   	: <input type="text" ng-model="role.title">
+Description    	: <textarea ng-model="role.description"> </textarea>
+List actions    : <div class="col-md-4" ng-repeat="action in actions_list" ng-click="toggleSelection(action._id)" > 		- <input type="checkbox" name="list_actions[]"  value="{{action.title}}" ng-checked="actions_selected.indexOf(action._id) > -1" > {{action.title}}	<br> </div>
+
+</pre>
+
+<input type="button" ng-click="saveRole(role)" value="Save" />

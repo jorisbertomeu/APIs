@@ -67,12 +67,13 @@ module.exports = function(app, express) {
 
     /* BOARD_INSTANCES RES */
     router.route('/board_instances')
-	.post(Board_instancesController._postL1)
-	.get(Board_instancesController._getL1);
-    router.route('/board_instances/:board_id')
-	.get(Board_instancesController._getL2)
-	.delete(Board_instancesController._deleteL2)
-	.put(Board_instancesController._putL2);
+	.get(Board_instancesController._get_all_board_instances);
+	router.route('/board_instance')
+	.post(Board_instancesController._create_board_instance);
+    router.route('/board_instance/:board_id')
+	.get(Board_instancesController._get_board_instance)
+	.put(Board_instancesController._update_board_instance)
+	.delete(Board_instancesController._delete_board_instance);
 
     /* CUSTOMERS RES */
     router.route('/customers')
@@ -85,8 +86,9 @@ module.exports = function(app, express) {
 
     /* USERS RES */
     router.route('/users')
-	.post(UsersController._create_user)
 	.get(UsersController._get_users);
+	router.route('/user')
+	.post(UsersController._create_user);
     router.route('/forgot')
 	.post(UsersController._postL1_forgot);
     router.route('/forgot/:forgot_id/:hash')
@@ -100,7 +102,7 @@ module.exports = function(app, express) {
 	.put(UsersController._update_user)
 	.delete(UsersController._delete_user);
 	router.route('/users/find/:requestString')
-	.get(UsersController._find_user)
+	.get(UsersController._find_user);
 
     /* PROJECT RES */
     router.route('/projects')
@@ -139,9 +141,10 @@ module.exports = function(app, express) {
 	.delete(SocsController._deleteL2);
 
 	/* Group routes */
-	router.route('/group')
-	.post(GroupsController._create_group)
+	router.route('/groups')
 	.get(GroupsController._get_groups);
+	router.route('/group')
+	.post(GroupsController._create_group);
 	router.route('/group/:group_id')
 	.put(GroupsController._update_group)
 	.get(GroupsController._get_group)
@@ -168,6 +171,8 @@ module.exports = function(app, express) {
 	.put(RolesController._update_role)
 	.get(RolesController._get_role)
 	.delete(RolesController._delete_role);
+	router.route('/roles/find/:requestString')
+	.get(RolesController._find_role);
 
 	/* Actions routes */
 	router.route('/actions')

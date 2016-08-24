@@ -1,0 +1,13 @@
+{{contenu}}
+<span ng-show='message.length > 0' style="color:red">
+        message : {{message}}
+</span>
+<pre>
+Title   	: <input type="text" ng-model="boardInstance.label">
+Description    	: <textarea ng-model="boardInstance.description"> </textarea>
+Customer_id 	: <input type="text" ng-model="boardInstance.customer_id" value="576d46649643f69d1e000001" disabled="true">
+Lab_id 		: <input type="text" ng-model="boardInstance.lab_id" value="576d3ca34e533e251d000002" disabled="true">
+Board_id 	: <input type="text" ng-model="boardInstance.board_id" value="576d099e1788e75d13000001" disabled="true">
+
+</pre>
+<input type="button" ng-click="saveBoardInstance(boardInstance)" value="Save" />

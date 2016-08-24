@@ -2,13 +2,12 @@
 <span ng-show='message.length > 0' style="color:red">
         message : {{message}}
 </span>
-<div class="col-md-4" ng-repeat="role in roles">
+
 			<pre>
 	Id 		: {{role._id}}
 	Title 		: {{role.title}}
 	Description 	: {{role.description}}
-	list actions 	: <div class="col-md-4" ng-repeat="action in role.actions_list"> 		- {{action.title}}	</div>
+	list actions 	: <div class="col-md-4" ng-repeat="action in role.actions_list"> 		- {{action.title}}	: {{action.description}}</div>
 	<a ng-href="#detailRole/{{role._id}}"">Detail</a>---<a ng-href="#editRole/{{role._id}}"">Edit</a>---<a ng-href="#deleteRole/{{role._id}}">Delete</a><br>
 	-----------------------------
 			</pre>
-</div>

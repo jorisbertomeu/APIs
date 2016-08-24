@@ -118,7 +118,7 @@ exports._get_groups= function(req, res) {
 					if(err) 
 						return Utils.sendError(res, err);
 					// Send groups
-					res.json(groups);
+					res.json({message: Utils.Constants._MSG_OK_, details: groups, code: Utils.Constants._CODE_OK_});
 				});
 			});
 

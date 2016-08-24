@@ -8,12 +8,29 @@
     <script src="js/app.js"></script>
     <script src="js/controllers/users.js"></script>
     <script src="js/controllers/roles.js"></script>
+    <script src="js/controllers/groups.js"></script>
+    <script src="js/controllers/board_instances.js"></script>
 	
 	<body ng-app="app">	
 
 		<div ng-controller="indexCtrl">
 			<h1>{{titre}}</h1>
-			<p> <a ng-href="#showUsers" >Show all users</a> | <a  ng-href="#addUser" >add User</a>  | <a  ng-href="#findUser" >find User</a>  | <a  ng-href="#showRoles" >show roles </a> </p>
+			<p>
+				<b>Users manager</b> 
+				<a ng-href="#showUsers" >Show all users</a> | <a  ng-href="#addUser" >add User</a>  | <a  ng-href="#findUser" >find User</a>
+			</p>
+			<p>
+				<b>Board Instance manager</b> 
+				<a  ng-href="#showBoardInstances" >show Board instances </a> | <a  ng-href="#addBoardInstance" >add Board Instance </a>   | <a  ng-href="#findBoardInstances" >find Board Instance</a>
+			</p>
+			<p>
+				<b>Groups manager</b> 
+				<a  ng-href="#showGroups" >show groups </a> | <a  ng-href="#addGroup" >add group </a>   | <a  ng-href="#findGroup" >find group</a>
+			</p>
+			<p>
+				<b>Roles manager</b> 
+				<a  ng-href="#showRoles" >show roles </a> | <a  ng-href="#addRole" >add role </a>   | <a  ng-href="#findRoles" >find Role</a>
+			</p>
 		</div>
 
 		<div ng-view></div>

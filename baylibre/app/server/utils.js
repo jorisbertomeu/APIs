@@ -314,6 +314,17 @@ exports.getUserByToken = function(req) {
     });
 };
 
+// Get action by title
+exports.getActionByTitle = function(actionTitle) {
+    return new Promise(function(resolve, reject) {
+        Action.findOne({title: actionTitle}, function(err, actions) {
+            if (err)
+                reject(err);
+            resolve(action);
+        });
+    });
+};
+
 function echo (string) {
     console.log(string);
 }

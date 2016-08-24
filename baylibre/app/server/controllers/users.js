@@ -90,7 +90,7 @@ exports._create_user = function(req, res) {
 						}
 						console.log('End Upload!');
 						
-						res.json({message: Utils.Constants._MSG_CREATED_, details: "User successfully created", code: Utils.Constants._CODE_OK_});
+						res.json({message: Utils.Constants._MSG_CREATED_, details: user, code: Utils.Constants._CODE_OK_});
 						Utils.getMailTransporter().sendMail(mailOptions, function(error, info) {
 							if (error)
 								return console.log(error);
@@ -278,7 +278,13 @@ exports._find_user = function(req, res) {
 
 		if(isAuthorized) {
 
-			User.find({$or :[{username: new RegExp('.*' + req.params.requestString + '.*')}, {first_name: new RegExp('.*' + req.params.requestString)}]}, function(err, user) {
+			User.find({$or :[
+								{username: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
+								{first_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
+								{last_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
+								{email: new RegExp('.*' + req.params.requestString + '.*',"i")}
+							]
+						}, function(err, user) {
 				if (err)
 					return Utils.sendError(res, err);
 
@@ -429,7 +435,6 @@ exports._delete_user = function(req, res) {
 
 
 			Promise.all([deleteUserFromBoardInstances, deleteUserFromGroupUsers]).then(function(rslt) {
-				console.log('user exist');
 				User.remove({_id: req.params.user_id}, function(err, user) {
 					if (err)
 						return Utils.sendError(res, err);

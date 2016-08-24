@@ -3,6 +3,7 @@ var Schema       = mongoose.Schema, ObjectId = Schema.ObjectId;
 
 var Board_instanceSchema   = new Schema({
     label: String,
+    description: String,
     created_on: Number,
     created_by: ObjectId,
     customer_id: ObjectId,

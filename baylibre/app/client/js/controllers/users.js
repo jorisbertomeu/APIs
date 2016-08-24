@@ -16,9 +16,9 @@ app.controller('showUsersController', function($scope, $http){
 });
 
  app.controller('findUserController', function($scope, $http, $routeParams){
-	$scope.contenu = "show all users :";
-    $scope.findUser = function (requestString) {
+	$scope.contenu = "Find users :";
 
+    $scope.findUser = function (requestString) {
     	// Call find users service
 		$http({
 	            method: 'GET',
@@ -46,10 +46,11 @@ app.controller('detailUserController', function($scope, $http, $routeParams){
 	         	console.log(response);
 			$scope.user = response.data.details;
 			$scope.message = response.data.message;
+
 		});
 });
 
-app.controller('addUserController', function($scope, $http){
+app.controller('addUserController', function($scope, $http, $location){
 	$scope.contenu = "Add User :";
 	$scope.user = {};
 	$scope.userFirstName;
@@ -78,8 +79,9 @@ app.controller('addUserController', function($scope, $http){
 
         // SEND THE FILES.
         $http(request)
-            .success(function (d) {
-                console.log(d);
+            .success(function (response) {
+                $scope.user = {};
+                $location.path('/detailUser/' + response.details._id);
             })
             .error(function (e) {
             	console.log(e);
@@ -88,7 +90,7 @@ app.controller('addUserController', function($scope, $http){
 });
 
 app.controller('editUserController', function($scope, $http, $routeParams, $location){
-	$scope.contenu = "Edit User :";
+    $scope.contenu = "Edit User :";
 
 	$scope.user = {};
 	// Call get all users service
