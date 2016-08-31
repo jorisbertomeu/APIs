@@ -3,9 +3,7 @@
         message : {{message}}
 </span>
 <pre>
-Title   	: <input type="text" ng-model="role.title">
-Description    	: <textarea ng-model="role.description"> </textarea>
-List actions    : <div class="col-md-4" ng-repeat="action in actions_list"> 		- <input type="checkbox" name="list_actions[]"  value="{{action.title}}" ng-click="toggleSelection(action._id)"> {{action.title}}	</div>
-
+Nome   		: <input type="text" ng-model="group.name">
+Description    	: <textarea ng-model="group.description"> </textarea>
 </pre>
-<input type="button" ng-click="saveRole(role)" value="Save" />
+<input type="button" ng-click="saveGroup(group)" value="Save" />

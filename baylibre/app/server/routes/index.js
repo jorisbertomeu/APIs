@@ -68,6 +68,8 @@ module.exports = function(app, express) {
     /* BOARD_INSTANCES RES */
     router.route('/board_instances')
 	.get(Board_instancesController._get_all_board_instances);
+	router.route('/board_instances/find/:requestString')
+	.get(Board_instancesController._find_board_instcance);
 	router.route('/board_instance')
 	.post(Board_instancesController._create_board_instance);
     router.route('/board_instance/:board_id')
@@ -145,13 +147,11 @@ module.exports = function(app, express) {
 	.get(GroupsController._get_groups);
 	router.route('/group')
 	.post(GroupsController._create_group);
-	router.route('/group/:group_id')
-	.put(GroupsController._update_group)
-	.get(GroupsController._get_group)
-	.delete(GroupsController._delete_group);
+	router.route('/group/find/:requestString')
+	.get(GroupsController._find_group);
 	router.route('/group/user_role')
-	.post(GroupsController._add_user_role)
-	.delete(GroupsController._remove_user_role);
+	.post(GroupsController._user_role)
+	.delete(GroupsController._remove_user);
 	router.route('/group/board_instance')
 	.post(GroupsController._add_board_instance);
 	//.get(GroupsController._getListBoardInstances);
@@ -160,6 +160,10 @@ module.exports = function(app, express) {
 	router.route('/group/add_user_in_board_instance')
 	.post(GroupsController._add_user_board_instance)
 	.delete(GroupsController._remove_user_board_instance);
+	router.route('/group/:group_id')
+	.put(GroupsController._update_group)
+	.get(GroupsController._get_group)
+	.delete(GroupsController._delete_group);
 
 
 	/* Role routes */

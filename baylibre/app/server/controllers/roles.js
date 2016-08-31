@@ -1,7 +1,7 @@
 // Mapped Objects
 var Role = require('../models/role');
 var Action	=	require('../models/action');
-var UserRoleBoaredInstance	=	require('../models/user_role_board_instance');
+var UserRoleBoaredInstance	=	require('../models/user_role_board_instances');
 var UserGroupRoles	=	require('../models/user_group_roles');
 
 // Import Modules
@@ -45,7 +45,7 @@ exports._create_role = function(req, res) {
 			    	if(err)
 			    		res.send(err);
 			    	// Send ok message
-			    	res.json({message: "User created successfully", details: role, code: Utils.Constants._CODE_OK_});
+			    	res.json({message: "Role created successfully", details: role, code: Utils.Constants._CODE_OK_});
 		    	});
 			}
     	});
@@ -222,7 +222,7 @@ exports._delete_role = function(req, res) {
 			});
 
 			Promise.all([deleteRoleFromBoardInstances, deleteRoleFromGroups]).then(function(rslt) {
-				// delete project
+				// delete role
 				Role.remove({_id : req.params.role_id }, function(err) {
 					if(err)
 						res.send(err);
@@ -231,7 +231,7 @@ exports._delete_role = function(req, res) {
 			});
 
 		} else 
-			// No project found for this Id
+			// No role found for this Id
 			res.json({message : 'Role not found!'});
 	});
 };

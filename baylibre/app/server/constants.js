@@ -35,6 +35,7 @@ define("_MSG_ROLE_TITLE_EXIST_", "Title is already used");
 
 /* Definition of global variables */
 define("_TRUE_", "true");
+define("_FALSE_", "false");
 define("_MSG_WELCOME_", "Welcome message");
 
 

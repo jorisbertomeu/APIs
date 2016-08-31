@@ -8,12 +8,18 @@ FirstName   : <input type="text" ng-model="user.first_name"><br>
 LastName    : <input type="text" ng-model="user.last_name"><br>
 UserName    : <input type="text" ng-model="user.username"><br>
 Email       : <input type="text" ng-model="user.email"><br>
-Is Admin    : <select ng-model="user.isAdmin" ng-init="user.isAdmin">
-				<option value="0">---Please select---</option>
+Is Baylibre    : <select ng-model="user.isAdmin" ng-options="o.v as o.n for o in [{ n: 'No', v: false }, { n: 'Yes', v: true }]">
 				<option value="true">Yes</option>
-				<option value="false" selected="true">No</option>
-			  </select>{{user.isAdmin}}<br>
-User avatar : <input type="file" ngf-select="" ng-model="user.avatar" name="file" ngf-accept="'image/*'" required=""></br>
+				<option value="false">No</option>
+			  </select><br>
+avarat : <input type="file" 
+                accept="image/*" 
+                image="img" 
+                name="img"
+                resize-max-height="300"
+                resize-max-width="250"
+                resize-quality="0.7" />
+		            <img ng-show="img" ng-src="{{img.resized.dataURL}}" /><br>
 
 </pre>
 <input type="button" ng-click="saveUser(user)" value="Save" />

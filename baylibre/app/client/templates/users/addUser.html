@@ -4,17 +4,27 @@
 </span>
 
 <pre>
+<form  name="addUser_form">
 FirstName   : <input type="text" ng-model="user.first_name">
 LastName    : <input type="text" ng-model="user.last_name">
 UserName    : <input type="text" ng-model="user.username">
 Password    : <input type="password" ng-model="user.password">
 Email       : <input type="text" ng-model="user.email">
-Is Admin    : <select ng-model="user.isAdmin">
+Is Baylibre    : <select ng-model="user.isAdmin">
 		<option value="">---Please select---</option>
 	<option value="true">Yes</option>
 		<option value="false">No</option>
 </select>
-User avatar : <input type="file" ngf-select="" ng-model="user.avatar" name="file" ngf-accept="'image/*'" required="">
-
+avarat : <input type="file" 
+                accept="image/*" 
+                image="image2" 
+                resize-max-height="300"
+                resize-max-width="250"
+                resize-quality="0.7" />
+		            <img ng-show="image2" ng-src="{{image2.resized.dataURL}}" ng-model="user.avatar" />
+<button ng-click="saveUser(user)">submit</button>
+</form>
 </pre>
-<input type="button" ng-click="saveUser(user)" value="Save" />
+
+
+

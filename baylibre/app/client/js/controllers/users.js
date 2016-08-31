@@ -1,3 +1,4 @@
+// Show all users
 app.controller('showUsersController', function($scope, $http){
 		$scope.contenu = "show all users :";
 
@@ -15,6 +16,7 @@ app.controller('showUsersController', function($scope, $http){
 		});
 });
 
+// Find user
  app.controller('findUserController', function($scope, $http, $routeParams){
 	$scope.contenu = "Find users :";
 
@@ -32,10 +34,12 @@ app.controller('showUsersController', function($scope, $http){
     }
 });
 
+// Show detail user
 app.controller('detailUserController', function($scope, $http, $routeParams){
 		$scope.contenu = "Detail user :";
 		$scope.message = "";
-
+        
+            
 		// Call get all users service
 		$http({
 	            method: 'GET',
@@ -44,55 +48,43 @@ app.controller('detailUserController', function($scope, $http, $routeParams){
 	            headers: {'Authorization': temp_token}
 	         }).then(function(response) {
 	         	console.log(response);
-			$scope.user = response.data.details;
-			$scope.message = response.data.message;
-
+    			$scope.user = response.data.details;
+    			$scope.message = response.data.message;
 		});
 });
 
-app.controller('addUserController', function($scope, $http, $location){
-	$scope.contenu = "Add User :";
-	$scope.user = {};
-	$scope.userFirstName;
+// Add new user controller
+app.controller('addUserController',['$http', '$scope', '$location', function($http, $scope, $location){
+    $scope.user = {};
 
-	var formdata = new FormData();
-    $scope.getTheFiles = function ($files) {
-        angular.forEach($files, function (value, key) {
-            formdata.append(key, value);
-        });
-    };
-
-    // NOW UPLOAD THE FILES.
-    $scope.saveUser = function (user) {
-
-    	console.log(user);
-
-        var request = {
+    $scope.saveUser = function(user){ 
+        if(null != $scope.image2)
+            user.avatar = $scope.image2.resized.dataURL
+        //console.log('image :' + $scope.image2.resized.dataURL);
+         console.log(user);
+        $http({
             method: 'POST',
-            url: 'http://localhost:8080/user/',
+            url: 'http://localhost:8080/user/', //webAPI exposed to upload the file
             headers: {
-            	'Content-Type': 'application/json',
+              'Content-Type': 'application/json',
                 'Authorization': temp_token
             },
-		    data: user
-        };
+            data: $scope.user//pass file as data, should be user ng-model
+        }).success(function (response) {
+            $location.path('/detailUser/' + response.details._id);
+        })
+        .error(function (e) {
+            console.log(e);
+        });
+    }
+}]);
 
-        // SEND THE FILES.
-        $http(request)
-            .success(function (response) {
-                $scope.user = {};
-                $location.path('/detailUser/' + response.details._id);
-            })
-            .error(function (e) {
-            	console.log(e);
-            });
-        }
-});
-
-app.controller('editUserController', function($scope, $http, $routeParams, $location){
+// Edit users
+app.controller('editUserController', ['$http', '$scope', '$location', '$routeParams', function($http, $scope, $location, $routeParams){
     $scope.contenu = "Edit User :";
 
 	$scope.user = {};
+    
 	// Call get all users service
 	$http({
             method: 'GET',
@@ -100,21 +92,25 @@ app.controller('editUserController', function($scope, $http, $routeParams, $loca
             dataType: 'jsonp',
             headers: {'Authorization': temp_token}
         }).success(function(response) {
-         	console.log(response);
+         	//console.log(response);
 			$scope.user = response.details;
+            if($scope.user.avatar != null) {
+                $scope.img = {};
+                $scope.img.resized = {};
+                $scope.img.resized.dataURL = $scope.user.avatar;
+            }
+            echo($scope.user);
 		}).error(function (e) {
             	console.log(e);
         });
 
-	var formdata = new FormData();
-    $scope.getTheFiles = function ($files) {
-        angular.forEach($files, function (value, key) {
-            formdata.append(key, value);
-        });
-    };
-
     // NOW UPLOAD THE FILES.
     $scope.saveUser = function (user) {
+
+        if(null != $scope.img.resized.dataURL) {
+            user.avatar = $scope.img.resized.dataURL;
+        }
+        echo(user);
         var request = {
             method: 'PUT',
             url: 'http://localhost:8080/user/' + $routeParams.id,
@@ -136,7 +132,7 @@ app.controller('editUserController', function($scope, $http, $routeParams, $loca
             	console.log(e);
             });
         }
-});
+}]);
 
 app.controller('deleteUserController', function($scope, $http, $routeParams){
 	$scope.contenu = "show all users :";
@@ -163,4 +159,10 @@ app.controller('deleteUserController', function($scope, $http, $routeParams){
 			$scope.users = response.data.details;
 		});
 });
+
+
+
+
+
+
 

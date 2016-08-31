@@ -1,3 +1,4 @@
+// Show all roles
 app.controller('showRolesController', function($scope, $http){
 		$scope.contenu = "show roles :";
 		$scope.actions_selected = {};
@@ -15,6 +16,8 @@ app.controller('showRolesController', function($scope, $http){
 
 		});
 });
+
+// Get role detail
 app.controller('detailRoleController', function($scope, $http, $routeParams){
 		$scope.contenu = "show role :";
 
@@ -34,12 +37,12 @@ app.controller('detailRoleController', function($scope, $http, $routeParams){
 
 
 //Find role controller
- app.controller('findRoleController', function($scope, $http, $routeParams){
+ app.controller('findRoleController', function($scope, $http){
 	$scope.contenu = "Find roles :";
 
     $scope.findRole = function (requestString) {
     	echo ('http://localhost:8080/roles/find/' + requestString);
-    	// Call find users service
+    	// Call find roles service
 		$http({
 	            method: 'GET',
 	            url: 'http://localhost:8080/roles/find/' + requestString,
@@ -52,7 +55,7 @@ app.controller('detailRoleController', function($scope, $http, $routeParams){
     }
 });
 
-
+// Edit Role service
 app.controller('editRoleController', function($scope, $http, $routeParams, $location){
 		$scope.contenu = "Update role :";
 
@@ -71,10 +74,9 @@ app.controller('editRoleController', function($scope, $http, $routeParams, $loca
 			$scope.role.actions_list.forEach(function(action) {
 				$scope.actions_selected.push(action._id);
 			});
-			echo($scope.actions_selected);
 		});
 
-	         // Call get all roles service
+	         // Call get all actions service
 		$http({
 	            method: 'GET',
 	            url: 'http://localhost:8080/actions',
@@ -86,7 +88,7 @@ app.controller('editRoleController', function($scope, $http, $routeParams, $loca
 
 		});
 
-	         // toggle selection for a given role by name
+	         // toggle actions selection
 		  $scope.toggleSelection = function toggleSelection(actionId) {
 		    var idx = $scope.actions_selected.indexOf(actionId);
 
@@ -103,7 +105,6 @@ app.controller('editRoleController', function($scope, $http, $routeParams, $loca
 
 		 $scope.saveRole = function (role) {
 	    	role.actions_list = $scope.actions_selected;
-	    	console.log(role);
 
 	    	var request = {
             method: 'PUT',
@@ -128,8 +129,7 @@ app.controller('editRoleController', function($scope, $http, $routeParams, $loca
 
 });
 
-
-
+// Add ROle service
 app.controller('addRoleController', function($scope, $http){
 
 		$scope.contenu = "Add role :";

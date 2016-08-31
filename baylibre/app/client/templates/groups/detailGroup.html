@@ -4,10 +4,13 @@
 </span>
 
 			<pre>
-	Id 		: {{role._id}}
-	Title 		: {{role.title}}
-	Description 	: {{role.description}}
-	list actions 	: <div class="col-md-4" ng-repeat="action in role.actions_list"> 		- {{action.title}}	: {{action.description}}</div>
-	<a ng-href="#detailRole/{{role._id}}"">Detail</a>---<a ng-href="#editRole/{{role._id}}"">Edit</a>---<a ng-href="#deleteRole/{{role._id}}">Delete</a><br>
+	Id 		: {{group._id}}
+	Name 		: {{group.name}}
+	Description 	: {{group.description}}
+	list user / role 	: <div class="col-md-4" ng-repeat="userRole in group.users_role"> 		- <img ng-show="userRole.user.avatar" ng-src="{{userRole.user.avatar}}"/> {{ userRole.user.first_name }} {{ userRole.user.last_name }} ({{ userRole.user.username }}) / {{userRole.role.title}}</div>
+	list board instances 	: <div class="col-md-4" ng-repeat="boardInstance in group.board_instances"> 		- {{boardInstance}}</div>
+	list roles 	: <div class="col-md-4" ng-repeat="role in group.list_roles"> 		- {{role.title}}</div>
+	<!-- list roles 	: <div class="col-md-4" ng-repeat="role in group.user_roles"> 		- {{role}}</div> -->
+	<a ng-href="#editGroup/{{group._id}}"">Edit</a>---<a ng-href="#groupRolesManager/{{group._id}}">roles manager</a>---<a ng-href="#groupUsersManager/{{group._id}}">users manager</a>---<a ng-href="#deleteGroup/{{group._id}}">Delete</a><br>
 	-----------------------------
 			</pre>

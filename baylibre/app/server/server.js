@@ -10,7 +10,10 @@ var data 			= fs.readFileSync('./config.json');
 var cors 			= require('cors');
 var path 			= require('path');
 
+
 app.use(express.static(path.join(__dirname, '../client')));
+app.use(bodyParser.urlencoded({limit: '50mb'}));
+app.use(bodyParser.json({limit: '50mb'}));
 
 
 try {

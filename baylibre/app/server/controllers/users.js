@@ -4,22 +4,20 @@ var Forgot 			= require('../models/forgot');
 var Customer 		= require('../models/customer');
 var Group 			= require('../models/group');
 var UserGroupRoles 	= require('../models/user_group_roles');
-var UseRoleBoardInstance = require('../models/user_role_board_instance');
+var UseRoleBoardInstance = require('../models/user_role_board_instances');
 
 // Import Modules
 var Promise = require('bluebird');
 var crypto = require('crypto');
 var nodemailer = require('nodemailer');
 var smtpTransport = require('nodemailer-smtp-transport');
-var multer = require('multer');
+
+//Mongoose
+var mongoose = require('mongoose');
+var Schema		= mongoose.Schema, ObjectId = Schema.ObjectId;
 
 // Utils
 var Utils = require('../utils');
-
-// Global vars
-// Path to upload user's avatar
-var upload = multer({dest: 'public/users_avatars'});
-
 
 // Create new user
 // Technical name "users_create_user"
@@ -28,7 +26,7 @@ exports._create_user = function(req, res) {
 	// Check fields
 	var missing = Utils.checkFields(req.body, ["first_name", "last_name", "username", "password", "email"]);
 	if (missing.length != 0)
-		return Utils.sendMissingParams(missing);
+		return Utils.sendMissingParams(res, missing);
 
 	// Check if email is already used
 	Promise.any([Utils.getUserByEmail(req.body.email)]).then(function(userByMail) {
@@ -44,7 +42,8 @@ exports._create_user = function(req, res) {
 
 					var user = new User();
 					var shasum = crypto.createHash('sha1');
-
+					echo('avatar :');
+					echo(req.body.avatar);
 					// Mappeig params
 					user.first_name		= req.body.first_name;
 					user.last_name		= req.body.last_name;
@@ -56,6 +55,7 @@ exports._create_user = function(req, res) {
 					user.created_on 	= Date.now() / 1000 | 0;
 					user.isAdmin 		= req.body.isAdmin;
 					user.customers_id 	= req.body.customers_id;
+					user.avatar 		= req.body.avatar;
 
 					// Get welcome mail template
 					try {
@@ -80,15 +80,6 @@ exports._create_user = function(req, res) {
 								html: Utils.parseWelcomeMail(mail_html, user, req)
 							};
 						}
-
-						// Upload avatar
-						console.log('Upload avatar :');
-						if(req.body.avatar != null) {
-							upload.any(function (req, res, next){
-								res.append(req.body.avatar);
-							});
-						}
-						console.log('End Upload!');
 						
 						res.json({message: Utils.Constants._MSG_CREATED_, details: user, code: Utils.Constants._CODE_OK_});
 						Utils.getMailTransporter().sendMail(mailOptions, function(error, info) {
@@ -275,10 +266,78 @@ exports._find_user = function(req, res) {
 
 	// Check if user have permission
 	Utils.isAuthorized(req, tachnical_title).then(function(isAuthorized) {
-
 		if(isAuthorized) {
 
-			User.find({$or :[
+			if(req.query.id_group != null && req.query.id_group != "") {
+				var list_id_users = [];
+
+					var findGroupUsersId = new Promise(function(resolve, reject) {
+							Group.findOne({_id: req.query.id_group}, 'users_role', function(err, groups){
+								if(err)
+									reject(err);
+								groups.users_role.forEach(function(userRole) {
+									if(userRole.user != null && userRole.user != "") {
+										list_id_users.push(userRole.user);
+										echo(list_id_users);
+									}
+								});
+								resolve(list_id_users);
+							});
+						});
+
+					if(req.query.not == Utils.Constants._TRUE_) {
+						Promise.all([findGroupUsersId]).then(function(list_id_users) {
+							list_id_users.forEach(function(elem) {
+								echo("ici :" + elem);
+							});
+
+							if(null != list_id_users && list_id_users != "") {
+
+								User.find({ $and: [ {
+												_id : { $not: { $in : list_id_users.toString().split(',').map(function(o){ echo(o.toString()); return mongoose.Types.ObjectId(o.toString()); }) }}
+
+											}, 
+										{
+									$or :[
+										{username: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
+										{first_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
+										{last_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
+										{email: new RegExp('.*' + req.params.requestString + '.*',"i")}
+									]}
+									]
+								}, function(err, user) {
+									if (err)
+										return Utils.sendError(res, err);
+
+									//Send result
+									res.json({message: Utils.Constants._MSG_OK_, details: user, code: Utils.Constants._CODE_OK_});
+								});
+							} else {
+								User.find( 
+										{
+									$or :[
+										{username: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
+										{first_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
+										{last_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
+										{email: new RegExp('.*' + req.params.requestString + '.*',"i")}
+									]
+									
+								}, function(err, user) {
+									if (err)
+										return Utils.sendError(res, err);
+
+									//Send result
+									res.json({message: Utils.Constants._MSG_OK_, details: user, code: Utils.Constants._CODE_OK_});
+								});
+							}
+						});
+
+					} else {
+						return Utils.sendError(res, "toooot");
+					}
+			} else {
+
+				User.find({$or :[
 								{username: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
 								{first_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
 								{last_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
@@ -291,6 +350,7 @@ exports._find_user = function(req, res) {
 				//Send result
 				res.json({message: Utils.Constants._MSG_OK_, details: user, code: Utils.Constants._CODE_OK_});
 			});
+		}
 		
 		} else {
 			Utils.sendUnauthorized(req, res);
@@ -331,7 +391,9 @@ exports._update_user = function(req, res) {
 					user.phone 			= req.body.phone;
 				if (req.body.hasOwnProperty('isAdmin'))
 					user.isAdmin 		= req.body.isAdmin;
-
+				if (req.body.hasOwnProperty('avatar'))
+					user.avatar 		= req.body.avatar;
+				
 				if (req.body.hasOwnProperty('customers_id') || req.body.hasOwnProperty('isAdmin')) {
 					Utils.checkToken(req, res, true).then(function(result) {
 						if (req.body.hasOwnProperty('customers_id'))
