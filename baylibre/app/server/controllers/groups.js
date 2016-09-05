@@ -14,6 +14,7 @@ var Promise = require('bluebird');
 
 // Utils
 var Utils = require('../utils');
+var groupServices = require('../services/groupServices');
 
 // Param's var
 var param_name				= "name";
@@ -21,6 +22,8 @@ var param_group_id			= "group_id";
 var param_user_id			= "user_id";
 var param_role_id			= "role_id";
 var param_board_instance_id	= "board_instance_id";
+var param_title 			= "title";
+var param_actions_list 		= "actions_list";
 
 // Create group function
 exports._create_group = function(req, res) {
@@ -36,7 +39,7 @@ exports._create_group = function(req, res) {
     	if(missing.length !=0) 
     		return Utils.sendMissingParams(res, missing);
 
-    	Promise.any([Utils.getGroupByName(req.body.name)]).then(function(groups) {
+    	Promise.any([groupServices.getGroupByName(req.body.name)]).then(function(groups) {
     		if(groups != null && groups.length > 0) 
 				return res.send({message: Utils.Constants._MSG_GROUP_NAME_EXIST_, details: "Group name is already used", code: Utils.Constants._CODE_KO_});
 			else {
@@ -54,17 +57,22 @@ exports._create_group = function(req, res) {
 								return Utils.sendError(res, err);
 							if (role != null) {
 								group.users_role.push({user: user._id, role: role._id});
-								group.list_roles.push(role);
+								Role.find({title: {$in: Utils.Constants._DEFAULT_ROLES_.split(",")}}, function(err, listRoles) {
+									if(err)
+										Utils.sendError(res, err);
+									//echo(listRoles.map(function(role){ return role._id;}));
+									listRoles.map(function(role){ group.list_roles.push(role._id);});
 
-							    // Save object
-							    group.save(function(err){
-							    	// Check errors
-							    	if(err)
-							    		return Utils.sendError(res, err);
-							    	
-							    	// Send ok message
-							    	res.json({message: "Group created successfully", details: group, code: Utils.Constants._CODE_OK_});
-						    	});
+									// Save object
+								    group.save(function(err){
+								    	// Check errors
+								    	if(err)
+								    		return Utils.sendError(res, err);
+								    	
+								    	// Send ok message
+								    	res.json({message: "Group created successfully", details: group, code: Utils.Constants._CODE_OK_});
+							    	});
+								});
 							} else 
 								// No group found for this Id
 								res.json({message : Utils.Constants._ADMIN_ROLE_TITLE_ + ' role not found!'});
@@ -115,29 +123,24 @@ exports._get_group = function(req, res) {
 	Utils.isAuthorized(req, req.body.group_id, tachnical_title).then(function(isAuthorized) {
 
 		if(isAuthorized) {
-			if (req.query.roles == Utils.Constants._TRUE_) {
+			if(req.query.full == Utils.Constants._TRUE_) {
 				// Get group by Id
-				Group.findById(req.params.group_id).populate({
-						    path: 'list_roles.actions_list',
-						    model: 'Action'
+				Group.findById(req.params.group_id).populate([
+						{
+							path:'users_role.user', 
+							model:'User'
+						}, 
+						{
+							path:'users_role.role'}, {
+							path: 'list_roles',
+						    model: 'Role',
+						    populate: 
+							{
+							    path: 'actions_list',
+							    model: 'Action'
 						  
-						})
-					.exec(function(err, group){
-					if(err)
-						// Send error
-						return Utils.sendError(res, err);
-					if(group != null) {
-						// Send result
-						res.json({message: Utils.Constants._MSG_OK_, details: group, code: Utils.Constants._CODE_OK_});
-					}
-					else 
-						// No group found for this Id
-						res.json({message : 'Group not found!'});
-				});
-
-			} else if(req.query.full == Utils.Constants._TRUE_) {
-				// Get group by Id
-				Group.findById(req.params.group_id).populate([{path:'users_role.user', model:'User'}, {path:'users_role.role', model:'Role'}, {path: 'list_roles.actions_list', model: 'Action'}])
+							}
+						}])
 					.exec(function(err, group){
 						if(err)
 							// Send error
@@ -151,7 +154,30 @@ exports._get_group = function(req, res) {
 							res.json({message : 'Group not found!'});
 					});
 
-			}else {
+			}else if (req.query.roles == Utils.Constants._TRUE_) {
+				// Get group by Id
+				Group.findById(req.params.group_id).populate({
+							path: 'list_roles',
+						    model: 'Role',
+							populate: {
+							    path: 'actions_list',
+							    model: 'Action'
+						  
+							}})
+					.exec(function(err, group){
+					if(err)
+						// Send error
+						return Utils.sendError(res, err);
+					if(group != null) {
+						// Send result
+						res.json({message: Utils.Constants._MSG_OK_, details: group, code: Utils.Constants._CODE_OK_});
+					}
+					else 
+						// No group found for this Id
+						res.json({message : 'Group not found!'});
+				});
+
+			} else  {
 
 				// Get group by Id
 				Group.findById(req.params.group_id, function(err, group){
@@ -185,8 +211,8 @@ exports._find_group = function(req, res) {
 		if(isAuthorized) {
 
 			Group.find({$or :[
-								{name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-								{description: new RegExp('.*' + req.params.requestString + '.*',"i")}
+								{name: new RegExp('.*' + req.query.requestString + '.*',"i")}, 
+								{description: new RegExp('.*' + req.query.requestString + '.*',"i")}
 							]
 						}, function(err, groups) {
 				if (err)
@@ -237,16 +263,53 @@ exports._update_group = function(req, res) {
 
 					} 
 
+					if(req.body.new_role != null) {
+						// Check request parms
+				    	missing = Utils.checkFields(req.body.new_role, [param_title, param_actions_list]);
+				    	if(missing.length !=0) 
+				    		return Utils.sendMissingParams(res, missing);
+					}
+
 					// Mapping list of roles
 					if(req.body.list_roles != null && req.body.list_roles.length > 0) {
-						group.list_roles = [];
-						req.body.list_roles.forEach(function(role) {
-							if(null == role._id)
-								role._id = mongoose.Types.ObjectId();
-							group.list_roles.push(role);
+						group.list_roles.forEach(function(roleId) {
+							echo(roleId);
+							echo(req.body.list_roles.indexOf(roleId.toString()));
+							if(req.body.list_roles.indexOf(roleId.toString()) == -1) {
+								group.list_roles.splice(roleId, 1);
+								Group.find({$and: [{$not: {_id: group._id}}, {list_roles : roleId}]}, function(err, groups) {
+									if(groups.length == 0) {
+										Role.remove({_id: roleId}, function(err, role) {
+											echo("Role " + roleId + " Successfully removed!");
+										});
+									}
+								});
+							} 							
 						});
+						group.list_roles = req.body.list_roles;
 						update = true;
 					}
+
+
+					var newRolePromise = new Promise(function(resolve, reject) {
+						// Check if add new role
+						if(req.body.new_role != null) {
+					    	var role 			= new Role();
+							// Mpping request params
+						    role.title 			= req.body.new_role.title;
+					    	role.description 	= req.body.new_role.description;
+					    	role.actions_list 	= req.body.new_role.actions_list;
+				    		role.save(function(err){
+						    	// Check errors
+						    	if(err)
+						    		reject(err);
+						    	// Send ok message
+						    	group.list_roles.push(role._id);
+						    	resolve(group);
+					    	});
+						} else
+							resolve(group);
+					});
 
 					// Mapping description
 					if(Utils.isNotEmpty(req.body.description)) {
@@ -259,14 +322,16 @@ exports._update_group = function(req, res) {
 						update = true;
 					}
 					
-					if(update) {
+
+					Promise.all([newRolePromise]).then(function(result) {
 						// Update group
 						group.save(function(err) {
 							if(err)
 								return Utils.sendError(res, err);
 						});
-					} 
-					res.json({message: 'Group updated!', details: group, code: Utils.Constants._CODE_OK_});	
+						res.json({message: 'Group updated!', details: group, code: Utils.Constants._CODE_OK_});	
+					})
+					
 					
 				} else 
 				// No customer found for this group

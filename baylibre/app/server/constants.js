@@ -14,6 +14,7 @@ define("_CODE_KO_", -1);
 
 /* Admin role title*/
 define("_ADMIN_ROLE_TITLE_", "Admin");
+define("_DEFAULT_ROLES_", "Admin,Users manager");
 
 
 /* Definition of message returned by API */

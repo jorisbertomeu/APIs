@@ -41,11 +41,10 @@ app.controller('detailRoleController', function($scope, $http, $routeParams){
 	$scope.contenu = "Find roles :";
 
     $scope.findRole = function (requestString) {
-    	echo ('http://localhost:8080/roles/find/' + requestString);
     	// Call find roles service
 		$http({
 	            method: 'GET',
-	            url: 'http://localhost:8080/roles/find/' + requestString,
+	            url: 'http://localhost:8080/roles/find?requestString=' + requestString,
 	            dataType: 'jsonp',
 	            headers: {'Authorization': temp_token}
 	         }).then(function(response) {
@@ -130,7 +129,7 @@ app.controller('editRoleController', function($scope, $http, $routeParams, $loca
 });
 
 // Add ROle service
-app.controller('addRoleController', function($scope, $http){
+app.controller('addRoleController', function($scope, $http, $location){
 
 		$scope.contenu = "Add role :";
 		$scope.role = {};

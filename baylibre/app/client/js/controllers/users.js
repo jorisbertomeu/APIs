@@ -24,7 +24,7 @@ app.controller('showUsersController', function($scope, $http){
     	// Call find users service
 		$http({
 	            method: 'GET',
-	            url: 'http://localhost:8080/users/find/' + requestString,
+	            url: 'http://localhost:8080/users/find?requestString=' + requestString,
 	            dataType: 'jsonp',
 	            headers: {'Authorization': temp_token}
 	         }).then(function(response) {

@@ -287,61 +287,55 @@ exports._find_user = function(req, res) {
 
 					if(req.query.not == Utils.Constants._TRUE_) {
 						Promise.all([findGroupUsersId]).then(function(list_id_users) {
-							list_id_users.forEach(function(elem) {
-								echo("ici :" + elem);
-							});
 
-							if(null != list_id_users && list_id_users != "") {
+							if(Utils.isNotEmpty(req.query.requestString)) {
 
-								User.find({ $and: [ {
-												_id : { $not: { $in : list_id_users.toString().split(',').map(function(o){ echo(o.toString()); return mongoose.Types.ObjectId(o.toString()); }) }}
+									User.find({ $and: [ {
+													_id : { $not: { $in : list_id_users.toString().split(',').map(function(o){ echo(o.toString()); return mongoose.Types.ObjectId(o.toString()); }) }}
 
-											}, 
-										{
-									$or :[
-										{username: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-										{first_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-										{last_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-										{email: new RegExp('.*' + req.params.requestString + '.*',"i")}
-									]}
-									]
-								}, function(err, user) {
-									if (err)
-										return Utils.sendError(res, err);
+												}, 
+											{
+										$or :[
+											{username: new RegExp('.*' + req.query.requestString + '.*',"i")}, 
+											{first_name: new RegExp('.*' + req.query.requestString + '.*',"i")}, 
+											{last_name: new RegExp('.*' + req.query.requestString + '.*',"i")}, 
+											{email: new RegExp('.*' + req.query.requestString + '.*',"i")}
+										]}
+										]
+									}, function(err, user) {
+										if (err)
+											return Utils.sendError(res, err);
 
-									//Send result
-									res.json({message: Utils.Constants._MSG_OK_, details: user, code: Utils.Constants._CODE_OK_});
-								});
+										//Send result
+										res.json({message: Utils.Constants._MSG_OK_, details: user, code: Utils.Constants._CODE_OK_});
+									});
 							} else {
-								User.find( 
-										{
-									$or :[
-										{username: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-										{first_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-										{last_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-										{email: new RegExp('.*' + req.params.requestString + '.*',"i")}
-									]
-									
-								}, function(err, user) {
-									if (err)
-										return Utils.sendError(res, err);
+									User.find({
+												_id : { 
+														$not: { 
+																$in : list_id_users.toString().split(',').map(function(o){ echo(o.toString()); return mongoose.Types.ObjectId(o.toString()); }) 
+															}
+													}
+										}, function(err, user) {
+											if (err)
+												return Utils.sendError(res, err);
 
-									//Send result
-									res.json({message: Utils.Constants._MSG_OK_, details: user, code: Utils.Constants._CODE_OK_});
-								});
+											//Send result
+											res.json({message: Utils.Constants._MSG_OK_, details: user, code: Utils.Constants._CODE_OK_});
+										});
 							}
 						});
 
 					} else {
-						return Utils.sendError(res, "toooot");
+						res.json({message: Utils.Constants._MSG_OK_, details: "not = false", code: Utils.Constants._CODE_OK_});
 					}
 			} else {
 
 				User.find({$or :[
-								{username: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-								{first_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-								{last_name: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-								{email: new RegExp('.*' + req.params.requestString + '.*',"i")}
+								{username: new RegExp('.*' + req.query.requestString + '.*',"i")}, 
+								{first_name: new RegExp('.*' + req.query.requestString + '.*',"i")}, 
+								{last_name: new RegExp('.*' + req.query.requestString + '.*',"i")}, 
+								{email: new RegExp('.*' + req.query.requestString + '.*',"i")}
 							]
 						}, function(err, user) {
 				if (err)

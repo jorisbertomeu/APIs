@@ -76,7 +76,7 @@ app.controller('addBoardInstanceController', function($scope, $http, $location){
     	// Call find board instances service
 		$http({
 	            method: 'GET',
-	            url: 'http://localhost:8080/board_instances/find/' + requestString,
+	            url: 'http://localhost:8080/board_instances/find?requestString=' + requestString,
 	            dataType: 'jsonp',
 	            headers: {'Authorization': temp_token}
 	         }).then(function(response) {

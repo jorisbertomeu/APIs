@@ -68,7 +68,7 @@ module.exports = function(app, express) {
     /* BOARD_INSTANCES RES */
     router.route('/board_instances')
 	.get(Board_instancesController._get_all_board_instances);
-	router.route('/board_instances/find/:requestString')
+	router.route('/board_instances/find')
 	.get(Board_instancesController._find_board_instcance);
 	router.route('/board_instance')
 	.post(Board_instancesController._create_board_instance);
@@ -103,7 +103,7 @@ module.exports = function(app, express) {
 	.get(UsersController._get_user_by_id)
 	.put(UsersController._update_user)
 	.delete(UsersController._delete_user);
-	router.route('/users/find/:requestString')
+	router.route('/users/find')
 	.get(UsersController._find_user);
 
     /* PROJECT RES */
@@ -147,7 +147,7 @@ module.exports = function(app, express) {
 	.get(GroupsController._get_groups);
 	router.route('/group')
 	.post(GroupsController._create_group);
-	router.route('/group/find/:requestString')
+	router.route('/group/find')
 	.get(GroupsController._find_group);
 	router.route('/group/user_role')
 	.post(GroupsController._user_role)
@@ -169,13 +169,15 @@ module.exports = function(app, express) {
 	/* Role routes */
 	router.route('/roles')
 	.get(RolesController._get_roles);
+	router.route('/roles/group')
+	.get(RolesController._get_roles_group);
 	router.route('/role')
 	.post(RolesController._create_role);
 	router.route('/role/:role_id')
 	.put(RolesController._update_role)
 	.get(RolesController._get_role)
 	.delete(RolesController._delete_role);
-	router.route('/roles/find/:requestString')
+	router.route('/roles/find')
 	.get(RolesController._find_role);
 
 	/* Actions routes */

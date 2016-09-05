@@ -1,8 +1,9 @@
 // Mapped Objects
-var Role = require('../models/role');
-var Action	=	require('../models/action');
+var Role 					= require('../models/role');
+var Action					=	require('../models/action');
 var UserRoleBoaredInstance	=	require('../models/user_role_board_instances');
-var UserGroupRoles	=	require('../models/user_group_roles');
+var UserGroupRoles			=	require('../models/user_group_roles');
+var Group 					= require('../models/group');
 
 // Import Modules
 var Promise = require('bluebird');
@@ -17,7 +18,6 @@ var param_actions_list = "actions_list";
 
 // Create role function
 exports._create_role = function(req, res) {
-	
     // Check user token
     Utils.checkToken(req, res, false).then(function(result){
     	if(!result) {
@@ -39,7 +39,6 @@ exports._create_role = function(req, res) {
 			    role.title 			= req.body.title;
 		    	role.description 	= req.body.description;
 		    	role.actions_list 	= req.body.actions_list;
-
 	    		role.save(function(err){
 			    	// Check errors
 			    	if(err)
@@ -127,8 +126,8 @@ exports._find_role = function(req, res) {
 		if(isAuthorized) {
 
 			Role.find({$or :[
-								{title: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-								{description: new RegExp('.*' + req.params.requestString + '.*',"i")}
+								{title: new RegExp('.*' + req.query.requestString + '.*',"i")}, 
+								{description: new RegExp('.*' + req.query.requestString + '.*',"i")}
 							]
 						}, function(err, roles) {
 				if (err)
@@ -137,6 +136,93 @@ exports._find_role = function(req, res) {
 				//Send result
 				res.json({message: Utils.Constants._MSG_OK_, details: roles, code: Utils.Constants._CODE_OK_});
 			});
+		
+		} else {
+			Utils.sendUnauthorized(req, res);
+			return;
+		}
+	});
+};
+// Find role by group id service
+exports._get_roles_group = function(req, res) {
+	// Technical title : 
+	var tachnical_title = "roles_get_roles_group";
+	// Check if user have permission
+	Utils.isAuthorized(req, tachnical_title).then(function(isAuthorized) {
+
+		if(isAuthorized) {
+
+			if(Utils.isNotEmpty(req.query.group_id)) {
+
+				Group.findById(req.query.group_id, function(err, group) {
+					if(err)
+						return utils.sendError(res, err);
+					if(group != null) {
+						if(Utils.checkArray(group.list_roles)) {
+
+							if(Utils.isNotEmpty(req.query.requestString)) {
+
+								Role.find({
+											$and: [
+													{_id: {$in: group.list_roles}},
+													{
+														$or: [
+															{title: new RegExp('.*' + req.query.requestString + '.*',"i")}, 
+															{description: new RegExp('.*' + req.query.requestString + '.*',"i")}
+														]
+													}
+												]
+
+											}).populate('actions_list').exec(function(err, roles) {
+									if (err)
+										return Utils.sendError(res, err);
+									//Send result
+									res.json({message: Utils.Constants._MSG_OK_, details: roles, code: Utils.Constants._CODE_OK_});
+								});
+
+							} else if(req.query.in == Utils.Constants._TRUE_) {
+								Role.find({_id : {$in :group.list_roles}}, function(err, roles) {
+									if (err)
+										return Utils.sendError(res, err);
+									//Send result
+									res.json({message: Utils.Constants._MSG_OK_, details: roles, code: Utils.Constants._CODE_OK_});
+								});
+							} else if(req.query.in == Utils.Constants._FALSE_) {
+								Role.find({$and: [{_id: {$not: {$in: group.list_roles}}}, {group_id: null}]}, function(err, roles) {
+									if (err)
+										return Utils.sendError(res, err);
+									//Send result
+									res.json({message: Utils.Constants._MSG_OK_, details: roles, code: Utils.Constants._CODE_OK_});
+								});
+							} else {
+								Role.find({_id: {$in: group.list_roles}}).populate('actions_list').exec(function(err, roles) {
+									if (err)
+										return Utils.sendError(res, err);
+									//Send result
+									res.json({message: Utils.Constants._MSG_OK_, details: roles, code: Utils.Constants._CODE_OK_});
+								});
+							}
+						} else {
+							if(req.query.in == Utils.Constants._TRUE_) {
+									//Send result
+									res.json({message: Utils.Constants._MSG_OK_, details: null, code: Utils.Constants._CODE_OK_});
+							} else if(req.query.in == Utils.Constants._FALSE_) {
+								Role.find({group_id: null}, function(err, roles) {
+									if (err)
+										return Utils.sendError(res, err);
+									//Send result
+									res.json({message: Utils.Constants._MSG_OK_, details: roles, code: Utils.Constants._CODE_OK_});
+								});
+							}
+						}
+
+
+					} else 
+						res.json({message: "Group not found", details: null, null: Utils.Constants._CODE_OK_});
+				});
+			} else 
+				res.json({message: Utils.Constants._MSG_OK_, details: null, null: Utils.Constants._CODE_OK_});
+
 		
 		} else {
 			Utils.sendUnauthorized(req, res);

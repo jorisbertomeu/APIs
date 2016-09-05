@@ -179,7 +179,7 @@ exports.publicAccess = function(tab, res) {
 }
 
 function isNotEmpty(string) {
-    return string != null && string !== undefined && string != "";
+    return string != null && string != 'undefined' && string != "";
 }
 exports.isNotEmpty = isNotEmpty;
 
@@ -210,17 +210,6 @@ exports.sendMissingParams = function(res, mapas) {
     res.status(403);
     res.send({message: Constants._MSG_MISSING_PARAMS_, details: "Missing fallowing params : " + mapas, code: Constants._CODE_ARGS_});
 };
-
-// Get group by name
-exports.getGroupByName = function(groupName) {
-    return new Promise(function(resolve, reject) {
-        Group.find({"name" : groupName}, function (err, group) {
-            if(err)
-                reject(err);
-            resolve(group);
-        })
-    });
-}
 
 // Get role by title
 function getRoleByTitle (getRoleByTitle) {
@@ -324,6 +313,11 @@ exports.getActionByTitle = function(actionTitle) {
         });
     });
 };
+
+// check if array is empty
+exports.checkArray = function (array) {
+    return (null != array && array.length > 0);
+}
 
 function echo (string) {
     console.log(string);

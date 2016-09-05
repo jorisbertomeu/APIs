@@ -128,8 +128,8 @@ exports._find_board_instcance = function(req, res) {
 		if(isAuthorized) {
 
 			Board_instance.find({$or :[
-										{label: new RegExp('.*' + req.params.requestString + '.*',"i")}, 
-										{description: new RegExp('.*' + req.params.requestString + '.*',"i")}
+										{label: new RegExp('.*' + req.query.requestString + '.*',"i")}, 
+										{description: new RegExp('.*' + req.query.requestString + '.*',"i")}
 									]
 								}, function(err, boardInstances) {
 				if (err)
