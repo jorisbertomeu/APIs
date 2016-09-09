@@ -8,9 +8,9 @@
 	Name 		: {{group.name}}
 	Description 	: {{group.description}}
 	list user / role 	: <div class="col-md-4" ng-repeat="userRole in group.users_role"> 		- <img ng-show="userRole.user.avatar" ng-src="{{userRole.user.avatar}}"/> {{ userRole.user.first_name }} {{ userRole.user.last_name }} ({{ userRole.user.username }}) / {{userRole.role.title}}</div>
-	list board instances 	: <div class="col-md-4" ng-repeat="boardInstance in group.board_instances"> 		- {{boardInstance}}</div>
+	list board instances 	: <div class="col-md-4" ng-repeat="boardInstance in group.board_instances"> 		- Title 		: {{boardInstance.label}}
+		   - Description 	: {{boardInstance.description}}</div>
 	list roles 	: <div class="col-md-4" ng-repeat="role in group.list_roles"> 		- {{role.title}}</div>
-	<!-- list roles 	: <div class="col-md-4" ng-repeat="role in group.user_roles"> 		- {{role}}</div> -->
-	<!-- <a ng-href="#editGroup/{{group._id}}""> -->Edit<!-- </a> -->---<a ng-href="#groupRolesManager/{{group._id}}">roles manager</a>---<a ng-href="#groupUsersManager/{{group._id}}">users manager</a>---<a ng-href="#deleteGroup/{{group._id}}">Delete</a><br>
+	<a ng-href="#editGroup/{{group._id}}"">Edit</a>---<a ng-href="#groupRolesManager/{{group._id}}">roles manager</a>---<a ng-href="#groupUsersManager/{{group._id}}">users manager</a>---<a ng-href="#groupBoardInstancesManager/{{group._id}}">Board instances manager</a>---<a ng-href="#deleteGroup/{{group._id}}">Delete</a><br>
 	-----------------------------
 			</pre>

@@ -60,8 +60,6 @@ app.controller('addUserController',['$http', '$scope', '$location', function($ht
     $scope.saveUser = function(user){ 
         if(null != $scope.image2)
             user.avatar = $scope.image2.resized.dataURL
-        //console.log('image :' + $scope.image2.resized.dataURL);
-         console.log(user);
         $http({
             method: 'POST',
             url: 'http://localhost:8080/user/', //webAPI exposed to upload the file

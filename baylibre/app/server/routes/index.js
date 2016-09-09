@@ -152,9 +152,12 @@ module.exports = function(app, express) {
 	router.route('/group/user_role')
 	.post(GroupsController._user_role)
 	.delete(GroupsController._remove_user);
+	router.route('/groups/find_users_roles')
+	.get(GroupsController._find_user_role_);
 	router.route('/group/board_instance')
 	.post(GroupsController._add_board_instance);
-	//.get(GroupsController._getListBoardInstances);
+	router.route('/group/board_instance_details')
+	.get(GroupsController._board_instance_details_);
 	router.route('/group/board_instance/:board_instance_id')
 	.delete(GroupsController._remove_board_instance);
 	router.route('/group/add_user_in_board_instance')

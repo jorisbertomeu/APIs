@@ -179,7 +179,7 @@ exports.publicAccess = function(tab, res) {
 }
 
 function isNotEmpty(string) {
-    return string != null && string != 'undefined' && string != "";
+    return null != string && string != 'undefined' && string != "";
 }
 exports.isNotEmpty = isNotEmpty;
 

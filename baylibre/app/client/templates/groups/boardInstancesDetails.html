@@ -1,0 +1,21 @@
+{{contenu}}
+<span ng-show='message.length > 0' style="color:red">
+        message : {{message}}
+</span>
+
+
+<pre>
+	
+
+	Group name 		: {{group.name}}
+	Board instance title 		: {{board_instance.label}}
+	   - Description 	: {{board_instance.description}}
+
+	list user / role 	: 
+	<div class="col-md-4" ng-repeat="userRole in list_users_roles"> 
+		<input type="checkbox" name="listBoardInstanceRole[]" ng-click="toggleBoardInstanceRoleSelection(userRole._id)" ng-checked="board_instance_role_selected.indexOf(userRole._id) > -1"> 	- <img ng-show="userRole.user_id.avatar" ng-src="{{userRole.user_id.avatar}}"/> {{ userRole.user_id.first_name }} {{ userRole.user_id.last_name }} ({{ userRole.user_id.username }}) / {{userRole.role_id.title}}
+	</div>
+
+<input type="button" ng-click="saveGroup(group)" value="Save Group" />
+</pre>
+

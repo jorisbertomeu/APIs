@@ -1,0 +1,33 @@
+{{contenu}}
+<span ng-show='message.length > 0' style="color:red">
+        message : {{message}}
+</span>
+
+
+<pre>
+	
+
+	Name 		: {{group.name}}
+	Description 	: {{group.description}}
+	list board instances 	: 
+		Request   : <input type="text" ng-model="requestString"> <input type="button" ng-click="findBoardInstance(requestString)" value="Search" /> <button id="addBoardInstance">Add new board instance</button>
+	<div class="col-md-4" ng-repeat="board_insatnce in group.board_instances"> 
+		<input type="checkbox" name="listBoardInstance[]" ng-click="toggleBoardInstanceSelection(board_insatnce._id)" ng-checked="board_instance_selected.indexOf(board_insatnce._id) > -1"><img ng-show="board_insatnce.picture" ng-src="{{board_insatnce.picture}}"/> - Title 		: {{board_insatnce.label}}							<a ng-href="#groupBoardInstancesDetails/{{group._id}}/{{board_insatnce._id}}">Details</a>
+		   - Description 	: {{board_insatnce.description}}
+	</div>
+
+	<div id="addBoardInstance" style="display: none">
+			Title   	: <input type="text" ng-model="new_board_instance.label">
+			Description    	: <textarea ng-model="new_board_instance.description"> </textarea>
+			picture 	: <input type="file" 
+                accept="image/*" 
+                image="image2" 
+                resize-max-height="300"
+                resize-max-width="250"
+                resize-quality="0.7" />
+		            <img ng-show="image2" ng-src="{{image2.resized.dataURL}}" ng-model="user.avatar" />
+			<input type="button" ng-click="saveNewBoardInstance(new_board_instance)" value="Save Board instance" />
+	</div>
+<input type="button" ng-click="saveGroup(group)" value="Save Group" />
+</pre>
+

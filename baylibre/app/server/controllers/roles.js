@@ -188,6 +188,7 @@ exports._get_roles_group = function(req, res) {
 									res.json({message: Utils.Constants._MSG_OK_, details: roles, code: Utils.Constants._CODE_OK_});
 								});
 							} else if(req.query.in == Utils.Constants._FALSE_) {
+								echo('iciiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii');
 								Role.find({$and: [{_id: {$not: {$in: group.list_roles}}}, {group_id: null}]}, function(err, roles) {
 									if (err)
 										return Utils.sendError(res, err);
@@ -236,51 +237,53 @@ exports._update_role = function(req, res) {
 
 	var update = false;
 
-	// Get project by Id
-	Role.findById(req.params.role_id, function(err, role){
+	if(null != req.params.role_id && req.params.role_id != "") {
+		// Get project by Id
+		Role.findById(req.params.role_id, function(err, role){
 
-		if(err)
-			res.send(err);
-		else if (role != null) {
+			if(err)
+				res.send(err);
+			else if (role != null) {
 
-			// Check if role title is used
-			if(Utils.isNotEmpty(req.body.title)) {
-				if(role.title.localeCompare(req.body.title) != 0) {
-					Promise.any([Utils.getRoleByTitle(req.body.title)]).then(function(roles) {
-			    		if(roles != null && roles.length > 0 && roles.indexOf(role) == -1) 
-							return res.send({message: Utils.Constants._MSG_ROLE_TITLE_EXIST_, details: "Role title is already used", code: Utils.Constants._CODE_KO_});
+				// Check if role title is used
+				if(Utils.isNotEmpty(req.body.title)) {
+					if(role.title.localeCompare(req.body.title) != 0) {
+						Promise.any([Utils.getRoleByTitle(req.body.title)]).then(function(roles) {
+				    		if(roles != null && roles.length > 0 && roles.indexOf(role) == -1) 
+								return res.send({message: Utils.Constants._MSG_ROLE_TITLE_EXIST_, details: "Role title is already used", code: Utils.Constants._CODE_KO_});
+						});
+					} 
+					role.title = req.body.title;
+					update = true;
+
+				} 
+
+				// Mapping description
+				if(Utils.isNotEmpty(req.body.description)) {
+					role.description = req.body.description;
+					update = true;
+				}
+				if(null != req.body.actions_list && req.body.actions_list.length > 0) {
+					role.actions_list 	= req.body.actions_list;
+					update = true;
+				}
+				
+				if(update) {
+					// Update project
+					role.save(function(err) {
+						if(err)
+							res.send(err);
 					});
 				} 
-				role.title = req.body.title;
-				update = true;
-
-			} 
-
-			// Mapping description
-			if(Utils.isNotEmpty(req.body.description)) {
-				role.description = req.body.description;
-				update = true;
-			}
-			if(null != req.body.actions_list && req.body.actions_list.length > 0) {
-				role.actions_list 	= req.body.actions_list;
-				update = true;
-			}
-			
-			if(update) {
-				// Update project
-				role.save(function(err) {
-					if(err)
-						res.send(err);
-				});
-			} 
+					
+				res.json({message : 'Role updated!'});
 				
-			res.json({message : 'Role updated!'});
-			
-		} else 
-		// No customer found for this project
-		res.json({message : 'Role not found'});
+			} else 
+			// No customer found for this project
+			res.json({message : 'Role not found'});
 
-	});
+		});
+	}
 	
 };
 

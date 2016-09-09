@@ -79,10 +79,10 @@ var app = angular.module('app', ['ngRoute', 'imageuploadDemo'])
 			templateUrl : 'templates/groups/addGroup.html',
 			controller : 'addGroupController'
 		})
-		// .when('/editGroup/:id', {
-		// 	templateUrl : 'templates/groups/editGroup.html',
-		// 	controller : 'editGroupController'
-		// })
+		.when('/editGroup/:id', {
+			templateUrl : 'templates/groups/editGroup.html',
+			controller : 'editGroupController'
+		})
 		.when('/deleteGroup/:id', {
 			templateUrl : 'templates/groups/showGroups.html',
 			controller : 'deleteGroupController'
@@ -94,6 +94,14 @@ var app = angular.module('app', ['ngRoute', 'imageuploadDemo'])
 		.when('/groupUsersManager/:id', {
 			templateUrl : 'templates/groups/usersManager.html',
 			controller : 'usersManagerController'
+		})
+		.when('/groupBoardInstancesManager/:id', {
+			templateUrl : 'templates/groups/boardInstancesManager.html',
+			controller : 'boardInstancesManagerController'
+		})		
+		.when('/groupBoardInstancesDetails/:id_group/:id_board_instance', {
+			templateUrl : 'templates/groups/boardInstancesDetails.html',
+			controller : 'boardInstancesDetailsController'
 		})
 		// Board instance route
 		.when('/showBoardInstances', {

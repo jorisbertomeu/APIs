@@ -28,11 +28,14 @@ exports._create_board_instance = function(req, res) {
 	board_instance.description 	= req.body.description;
 	board_instance.customer_id 	= req.body.customer_id;
 	board_instance.lab_id 		= req.body.lab_id;
+	board_instance.picture 		= req.body.picture;
 	board_instance.created_on 	= Date.now() / 1000 | 0;
 	Utils.getUserByToken(req).then(function(err, user) {
 		if(err)
 			Utils.sendError(res, err);
-		board_instance.created_by 	= user._id;
+		if(null != user) {
+			board_instance.created_by 	= user._id;
+		}
 	});
 
 	board_instance.save(function(err) {

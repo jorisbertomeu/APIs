@@ -1,0 +1,60 @@
+{{contenu}}
+<span ng-show='message.length > 0' style="color:red">
+        message : {{message}}
+</span>
+
+<pre>
+	Name 		: {{group.name}}
+	Description 	: {{group.description}}
+	List roles 	: <button id="addRole">Add new role</button>
+	<div class="col-md-4" ng-repeat="role in group.list_roles"> 
+		   - Title 		: {{role.title}}
+		   	- Description 	: {{role.description}}
+	</div>
+	list users 	: <span ng-show='users_finded != null'>Request   : <input type="text" ng-model="requestSearch"> <input type="button" ng-click="findUser(requestSearch)" value="Search" /></span> <button id="addUser">Add new User</button>
+	<div class="col-md-4" ng-repeat="userRole in users_finded"> 
+		- <img ng-show="userRole.user.avatar" ng-src="{{userRole.user.avatar}}"/> :  {{userRole.user.first_name}} {{userRole.user.last_name}} ({{userRole.user.username}})	/	Role : <select ng-options="role.title for role in group.list_roles track by role._id" ng-model="userRole.role" ></select> <button ng-click="removeUserFromGroup(userRole.user._id)">Remove</button>
+	</div>
+</pre>
+
+
+<div id="addUser" style="display: none">
+	<pre>
+		Find new user   : <input type="text" ng-model="requestString"> <input type="button" ng-click="findUsers(requestString)" value="Search" />
+	</pre>
+
+	<span ng-show='messageUser.length > 0' style="color:red">
+        message : {{messageUser}}
+	</span>
+
+	<span ng-show='list_users_finded != null && list_users_finded.length > 0'>
+	    <div class="col-md-4" ng-repeat="user in list_users_finded">
+			<div class="panel panel-primary">
+				<div class="panel-body">
+					<pre>
+		<input type="checkbox" name="list_add_users[]" ng-click="addUsersSelection(user._id)">									Role :  <select id="{{user._id}}" ng-change="changed(user._id)" ng-model="defaultRole" ng-options="role.title for role in group.list_roles track by role._id" ></select>
+		<img ng-show="user.avatar" ng-src="{{user.avatar}}"/>
+		FName 	: {{ user.first_name }}
+		LName 		: {{ user.last_name }}
+		Username 	: {{ user.username }}
+		Email 		: {{ user.email }}
+		-----------------------------
+						<br>
+					</pre>
+				</div>
+
+			</div>
+		</div>
+		<button id="saveUser" ng-click="saveUsers()">Save Users</button>
+	</span>
+</div>
+<div id="addRole" style="display: none">
+	<pre>
+		Title   	: <input type="text" ng-model="role.title">
+		Description    	: <textarea ng-model="role.description"> </textarea>
+		List actions    : <div class="col-md-4" ng-repeat="action in actions_list"> 		- <input type="checkbox" name="list_actions[]" ng-click="toggleActionSelection(action._id)" ng-checked="actions_selected.indexOf(action._id) > -1"> {{action.title}}	</div>
+		<input type="button" ng-click="saveRole(role)" value="Save Role" />
+	</pre>
+</div>
+<input type="button" ng-click="saveGroup(group)" value="Save Group" />
+

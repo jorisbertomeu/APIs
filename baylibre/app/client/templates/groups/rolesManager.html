@@ -1,0 +1,31 @@
+{{contenu}}
+<span ng-show='message.length > 0' style="color:red">
+        message : {{message}}
+</span>
+
+
+<pre>
+	
+
+	Name 		: {{group.name}}
+	Description 	: {{group.description}}
+	list roles 	: 
+		Request   : <input type="text" ng-model="requestString"> <input type="button" ng-click="findRole(requestString)" value="Search" /> <button id="addRole">Add new role</button>
+	<div class="col-md-4" ng-repeat="role in group.list_roles"> 
+		<input type="checkbox" name="listRoles[]" ng-click="toggleRoleSelection(role._id)" ng-checked="roles_selected.indexOf(role._id) > -1"> - Title 		: {{role.title}}
+		   - Description 	: {{role.description}}
+		   - list actions 	: <div class="col-md-4" ng-repeat="action in role.actions_list"> 			- {{action.title}}	: {{action.description}}</div>
+	</div>
+
+	<div id="addRole" style="display: none">
+		<span ng-show="list_roles_not_in_group.length > 0"><select ng-model="new_selected_role" ng-options="role.title for role in list_roles_not_in_group track by role._id"></select> <input type="button" ng-click="saveRole()" value="Add" /></span> <button id="newRole">Create new role</button>
+		<div id="newRole" style="display: none">
+			Title   	: <input type="text" ng-model="role.title">
+			Description    	: <textarea ng-model="role.description"> </textarea>
+			List actions    : <div class="col-md-4" ng-repeat="action in actions_list"> 		- <input type="checkbox" name="list_actions[]" ng-click="toggleActionSelection(action._id)" ng-checked="actions_selected.indexOf(action._id) > -1"> {{action.title}}	</div>
+			<input type="button" ng-click="saveNewRole(role)" value="Save Role" />
+		</div>
+	</div>
+<input type="button" ng-click="saveGroup(group)" value="Save Group" />
+</pre>
+
